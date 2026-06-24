@@ -3005,19 +3005,33 @@
       reader.readAsDataURL(file);
     }
     function addIdColor(id) {
+      const hex = prompt('Cole o código hex da cor (ex: #1a73e8):', '#');
+      if (hex === null) return;
+      const clean = hex.trim();
+      if (!/^#?[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(clean)) {
+        if (clean !== '') alert('Código hex inválido. Use o formato #RRGGBB ou #RGB.');
+        return openColorPicker(id);
+      }
+      const value = clean.startsWith('#') ? clean : '#' + clean;
+      pushIdColor(id, value);
+    }
+    function openColorPicker(id) {
       const inp = document.createElement('input'); inp.type = 'color'; inp.value = '#ffffff';
       inp.style.cssText = 'position:fixed;top:-999px;left:-999px;opacity:0;pointer-events:none';
       document.body.appendChild(inp);
       inp.addEventListener('change', () => {
         document.body.removeChild(inp);
-        if (cards[id]) {
-          if (!cards[id].data.colors) cards[id].data.colors = ['#e0e0e0', '#1a1a1a', '#666666'];
-          cards[id].data.colors.push(inp.value);
-          rebuildIdentitySection(id, 'colors');
-          saveCurrentWf();
-        }
+        pushIdColor(id, inp.value);
       });
       inp.click();
+    }
+    function pushIdColor(id, value) {
+      if (cards[id]) {
+        if (!cards[id].data.colors) cards[id].data.colors = ['#e0e0e0', '#1a1a1a', '#666666'];
+        cards[id].data.colors.push(value);
+        rebuildIdentitySection(id, 'colors');
+        saveCurrentWf();
+      }
     }
 
     /* ═══ TOGGLE IDENTITY SECTIONS ═══ */
