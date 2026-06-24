@@ -10,7 +10,11 @@ exports.handler = async (event) => {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
-  const store = getStore('cria-ativos');
+  // Em alguns sites o Netlify não injeta o contexto de Blobs automaticamente
+  // no runtime da função; nesse caso caímos para credenciais explícitas.
+  const store = (process.env.NETLIFY_SITE_ID && process.env.NETLIFY_API_TOKEN)
+    ? getStore({ name: 'cria-ativos', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_API_TOKEN })
+    : getStore('cria-ativos');
 
   if (event.httpMethod === 'POST') {
     try {
