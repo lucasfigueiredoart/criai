@@ -2037,6 +2037,7 @@
 </head>
 
 <body>
+  <input type="file" id="font-file-input" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFontFileSelected(event)">
   <div id="app">
 
     <!-- SIDEBAR -->
@@ -2940,8 +2941,18 @@
       if (!confirm('Remover imagem de referência?')) return;
       setRefImage(id, '');
     }
+    function fontName(f) { return typeof f === 'string' ? f : f.name; }
+    function loadCustomFont(f) {
+      if (typeof f === 'string' || !f.src) return;
+      if (window.__loadedFonts && window.__loadedFonts.has(f.name)) return;
+      window.__loadedFonts = window.__loadedFonts || new Set();
+      window.__loadedFonts.add(f.name);
+      const face = new FontFace(f.name, `url(${f.src})`);
+      face.load().then(loaded => document.fonts.add(loaded)).catch(() => {});
+    }
     function fontsChipsHtml(id, fonts) {
-      return (fonts || []).map((f, i) => `<div class="id-chip" style="font-family:'${f}'">${f}<span class="id-chip-x" onclick="event.stopPropagation();delIdFont('${id}',${i})" title="Remover fonte">×</span></div>`).join('')
+      (fonts || []).forEach(loadCustomFont);
+      return (fonts || []).map((f, i) => `<div class="id-chip" style="font-family:'${fontName(f)}'">${fontName(f)}<span class="id-chip-x" onclick="event.stopPropagation();delIdFont('${id}',${i})" title="Remover fonte">×</span></div>`).join('')
         + `<div class="id-chip-add" onclick="addIdFont('${id}')">+ fonte</div>`;
     }
     function colorSwatchesHtml(id, colors) {
@@ -2972,14 +2983,26 @@
       rebuildIdentitySection(id, 'colors');
       saveCurrentWf();
     }
+    let __fontUploadTargetId = null;
     function addIdFont(id) {
-      const name = prompt('Nome da fonte:'); if (!name) return;
-      if (cards[id]) {
+      __fontUploadTargetId = id;
+      document.getElementById('font-file-input').click();
+    }
+    function handleFontFileSelected(e) {
+      const file = e.target.files[0];
+      e.target.value = '';
+      const id = __fontUploadTargetId;
+      if (!file || !id || !cards[id]) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const defaultName = file.name.replace(/\.[^.]+$/, '');
+        const name = prompt('Nome da fonte:', defaultName) || defaultName;
         if (!cards[id].data.fonts) cards[id].data.fonts = ['Syne', 'DM Mono'];
-        cards[id].data.fonts.push(name);
+        cards[id].data.fonts.push({ name, src: reader.result });
         rebuildIdentitySection(id, 'fonts');
         saveCurrentWf();
-      }
+      };
+      reader.readAsDataURL(file);
     }
     function addIdColor(id) {
       const inp = document.createElement('input'); inp.type = 'color'; inp.value = '#ffffff';
@@ -3024,7 +3047,7 @@
             idParts.push(pt);
           }
           if (on('fonts') && src.data.fonts?.length)
-            idParts.push(`Fontes da marca: ${src.data.fonts.join(', ')}.`);
+            idParts.push(`Fontes da marca: ${src.data.fonts.map(fontName).join(', ')}.`);
           if (on('colors') && src.data.colors?.length)
             idParts.push(`Paleta de cores (hex): ${src.data.colors.join(', ')}.`);
           if (on('logo') && src.data.logoUrl)
