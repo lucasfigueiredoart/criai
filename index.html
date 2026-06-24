@@ -2867,6 +2867,7 @@
     <div class="cr-post" id="cr-post-${id}">
       <button class="cr-pbtn" onclick="dlCard('${id}')">⬇ Baixar</button>
       <button class="cr-pbtn" onclick="toggleAlter('${id}')">✎ Alterar</button>
+      <button class="cr-pbtn" id="cr-expand-${id}" onclick="expandToStories('${id}')" title="Reaproveita esta arte e expande as bordas com IA para o formato 2:3 (Stories)">↕ Versão Stories</button>
     </div>
     <div class="alter-box" id="alter-${id}">
       <textarea class="alter-ta" rows="2" placeholder="Instruções de ajuste..."></textarea>
@@ -3330,6 +3331,69 @@
     }
     function dlAll() { galleryItems.forEach((it, i) => setTimeout(() => dlGalleryItem(it.gid), i * 600)) }
     function toggleAlter(id) { document.getElementById('alter-' + id)?.classList.toggle('open') }
+
+    // Coloca a imagem original centralizada num canvas maior, deixando o
+    // restante transparente — essa transparência funciona como máscara para
+    // a IA saber o que deve preencher/estender (outpainting).
+    function padToCanvasPng(srcUrl, w, h) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          const dx = Math.round((w - img.width) / 2);
+          const dy = Math.round((h - img.height) / 2);
+          ctx.drawImage(img, dx, dy);
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao preparar imagem')), 'image/png');
+        };
+        img.onerror = () => reject(new Error('Falha ao carregar a imagem original'));
+        img.src = srcUrl;
+      });
+    }
+    async function expandToStories(id) {
+      const d = genImgs[id]; if (!d?.url) { alert('Nenhuma imagem gerada ainda.'); return; }
+      const model = document.getElementById('def-model')?.value || 'gpt-image-1';
+      if (model !== 'gpt-image-1' && model !== 'gpt-image-2') {
+        alert('Esta opção só funciona com os modelos gpt-image-1 ou gpt-image-2 (selecione em Configurações).');
+        return;
+      }
+      const key = getActiveApiKey();
+      if (!key) { alert('Configure sua API Key em Configurações.'); return; }
+
+      const btn = document.getElementById('cr-expand-' + id);
+      const original = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = '↻ Expandindo...'; }
+
+      try {
+        const padded = await padToCanvasPng(d.url, 1024, 1536);
+        const fd = new FormData();
+        fd.append('image', padded, 'source.png');
+        fd.append('prompt', 'Estenda naturalmente o fundo, as cores, a iluminação e os elementos gráficos desta imagem para preencher as áreas transparentes no topo e na base. Mantenha exatamente o conteúdo central já existente sem nenhuma alteração — mesmo rosto, texto e composição.');
+        fd.append('model', model);
+        fd.append('n', '1');
+        fd.append('size', '1024x1536');
+        fd.append('quality', 'high');
+
+        const res = await fetch('https://api.openai.com/v1/images/edits', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + key },
+          body: fd,
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+        const outUrl = data.data[0].b64_json
+          ? 'data:image/png;base64,' + data.data[0].b64_json
+          : data.data[0].url;
+
+        addToGallery(id, outUrl);
+        dlUrl(outUrl, `criativo_${id}_stories_${Date.now()}.png`);
+      } catch (err) {
+        alert('Erro ao expandir para Stories: ' + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = original; }
+      }
+    }
 
     /* ═══ SAVE / LOAD PROJECT ═══ */
     function saveProject() {
