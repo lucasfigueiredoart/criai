@@ -1,0 +1,3905 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cria-ativos</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    :root {
+      --bg: #080808;
+      --bg2: #101010;
+      --bg3: #161616;
+      --bg4: #1e1e1e;
+      --bg5: #252525;
+      --b1: #1e1e1e;
+      --b2: #2a2a2a;
+      --b3: #383838;
+      --b4: #484848;
+      --b5: #585858;
+      --t1: #f0f0f0;
+      --t2: #aaaaaa;
+      --t3: #666666;
+      --t4: #3a3a3a;
+      --line-col: rgba(110, 110, 110, 0.32);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--t1)
+    }
+
+    #app {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: 172px;
+      min-width: 172px;
+      background: var(--bg2);
+      border-right: 1px solid var(--b1);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 0;
+      gap: 14px;
+      z-index: 500;
+      flex-shrink: 0;
+      overflow-y: auto
+    }
+
+    .sb-logo {
+      display: flex;
+      align-items: center;
+      padding: 0 18px
+    }
+
+    .sb-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .sb-group {
+      border-left: 3px solid transparent;
+      padding-left: 13px;
+      margin-right: 10px
+    }
+    .sb-group.g-imagem { border-left-color: #5b8def }
+    .sb-group.g-post   { border-left-color: #54c08a }
+    .sb-group.g-video  { border-left-color: #e0617a }
+    .sb-group.g-config { border-left-color: #caa45a }
+
+    .sb-hdr {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      color: var(--t3);
+      border-radius: 0 7px 7px 0;
+      transition: all .15s
+    }
+    .sb-hdr:hover { background: rgba(255,255,255,.045); color: var(--t1) }
+    .sb-hdr.active { background: rgba(255,255,255,.07); color: var(--t1) }
+
+    .sb-items {
+      display: flex;
+      flex-direction: column
+    }
+    .sb-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px 6px 22px;
+      font-size: 11px;
+      color: var(--t4);
+      border-radius: 0 6px 6px 0;
+      transition: all .15s
+    }
+    .sb-item:hover { background: rgba(255,255,255,.04); color: var(--t2) }
+    .sb-item.active { background: rgba(255,255,255,.06); color: var(--t1) }
+
+    /* PLACEHOLDER VIEW */
+    .ph-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 10px
+    }
+    .ph-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid currentColor;
+      background: rgba(255,255,255,.04)
+    }
+    .ph-icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.5 }
+    .ph-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--t1)
+    }
+    .ph-sub {
+      font-size: 11px;
+      color: var(--t3)
+    }
+
+    /* MAIN */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      min-width: 0
+    }
+
+    /* TOPBAR */
+    #topbar {
+      height: 42px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--b1);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 10px;
+      z-index: 400;
+      flex-shrink: 0;
+      position: relative
+    }
+
+    #brand {
+      display: flex;
+      align-items: center
+    }
+
+    #wf-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg3);
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--t2);
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s
+    }
+
+    #wf-btn:hover {
+      border-color: var(--b3);
+      color: var(--t1)
+    }
+
+    #tb-right {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .tb-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--t3);
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s
+    }
+
+    .tb-btn:hover {
+      border-color: var(--b3);
+      color: var(--t2)
+    }
+
+    .tb-btn.hi {
+      border-color: var(--b3);
+      color: var(--t1);
+      background: var(--bg4)
+    }
+
+    .tb-sel {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg3);
+      color: var(--t2);
+      font-size: 10px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      max-width: 130px
+    }
+
+    /* API STATUS WIDGET */
+    #api-status-wrap { position: relative }
+    #api-status-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg3);
+      cursor: pointer;
+      transition: all .15s
+    }
+    #api-status-btn:hover { border-color: var(--b3) }
+
+    .api-led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 5px currentColor
+    }
+    .led-green  { background: #5fcf7a; color: #5fcf7a }
+    .led-yellow { background: #d8c24a; color: #d8c24a }
+    .led-red    { background: #e16868; color: #e16868 }
+
+    #api-status-drop {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 210px;
+      background: var(--bg3);
+      border: 1px solid var(--b2);
+      border-radius: 9px;
+      padding: 8px;
+      z-index: 900;
+      box-shadow: 0 10px 28px rgba(0,0,0,.45)
+    }
+    #api-status-drop.open { display: block }
+    .asd-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t4);
+      padding: 2px 4px 7px
+    }
+    .asd-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 4px;
+      font-size: 11px;
+      color: var(--t2)
+    }
+    .asd-row .api-led { flex-shrink: 0 }
+    .asd-name { flex: 1 }
+    .asd-state { font-size: 9px; color: var(--t4) }
+
+    /* VIEWS */
+    .view {
+      display: none;
+      position: absolute;
+      inset: 0
+    }
+
+    .view.active {
+      display: block
+    }
+
+    /* BOARD VIEW */
+    #board-view {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--bg)
+    }
+
+    /* SVG LINES — above canvas so hover/click events reach the paths */
+    #svg-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4000px;
+      height: 4000px;
+      pointer-events: none;
+      z-index: 3;
+      transform-origin: 0 0;
+      overflow: visible
+    }
+
+    /* CANVAS — z-index 2, cards sit here */
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4000px;
+      height: 4000px;
+      transform-origin: 0 0;
+      z-index: 2
+    }
+
+    /* CARDS — all position:absolute inside #canvas */
+    .ca-card {
+      position: absolute;
+      border-radius: 12px;
+      border: 1px solid var(--b1);
+      user-select: none
+    }
+
+    .ca-card:hover {
+      border-color: var(--b2)
+    }
+
+    /* IDENTITY CARD */
+    .identity-card {
+      width: 220px;
+      background: #1b1130;
+      border-color: rgba(170,120,230,.4);
+      z-index: 20;
+      --t1: #fff; --t2: #fff; --t3: #fff; --t4: #fff;
+      color: #fff;
+    }
+    .identity-card * { color: #fff }
+
+    .id-section {
+      padding: 8px 13px;
+      border-top: 1px solid var(--b1)
+    }
+
+    .id-sec-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px
+    }
+
+    .id-sec-label {
+      font-size: 8px;
+      font-family: 'DM Mono', monospace;
+      color: var(--t4);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 0
+    }
+
+    .id-toggle {
+      width: 26px;
+      height: 14px;
+      border-radius: 7px;
+      background: var(--b2);
+      cursor: pointer;
+      position: relative;
+      transition: background .2s;
+      flex-shrink: 0
+    }
+    .id-toggle.on { background: #3a5a3a }
+    .id-toggle::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--t4);
+      top: 2px;
+      left: 2px;
+      transition: all .2s
+    }
+    .id-toggle.on::after { left: 14px; background: #8ab88a }
+    .id-sc-off { opacity: .22; pointer-events: none }
+
+    .id-upload-box {
+      width: 100%;
+      height: 58px;
+      border: 1px dashed var(--b2);
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      background: var(--bg);
+      overflow: hidden;
+      transition: border-color .15s
+    }
+
+    .id-upload-box:hover {
+      border-color: var(--b3)
+    }
+
+    .id-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .id-chip {
+      padding: 3px 7px;
+      border-radius: 5px;
+      border: 1px solid var(--b2);
+      background: var(--bg3);
+      font-size: 10px;
+      color: var(--t2);
+      cursor: default
+    }
+
+    .id-chip-add {
+      padding: 3px 7px;
+      border-radius: 5px;
+      border: 1px dashed var(--b2);
+      font-size: 10px;
+      color: var(--t4);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .id-chip-add:hover {
+      border-color: var(--b3);
+      color: var(--t2)
+    }
+
+    .id-colors {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .id-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px solid var(--b3);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .id-swatch-add {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px dashed var(--b2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--t4);
+      font-size: 14px;
+      transition: all .15s
+    }
+
+    .id-swatch-add:hover {
+      border-color: var(--b3);
+      color: var(--t2)
+    }
+
+    .id-ref-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .id-ref-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      background: var(--bg3);
+      border-radius: 6px;
+      border: 1px solid var(--b1)
+    }
+
+    .id-ref-img {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: var(--bg4);
+      flex-shrink: 0
+    }
+
+    .id-ref-name {
+      font-size: 10px;
+      color: var(--t2);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .id-ref-del {
+      width: 16px;
+      height: 16px;
+      border: none;
+      background: transparent;
+      color: var(--t4);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .id-ref-del:hover {
+      color: var(--t2);
+      background: var(--bg5)
+    }
+
+    /* Removable chip / swatch (fonts & colors) */
+    .id-chip { position: relative; padding-right: 18px }
+    .id-chip-x, .id-swatch-x {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--bg5);
+      border: 1px solid var(--b3);
+      color: var(--t3);
+      font-size: 9px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .12s, color .12s, background .12s
+    }
+    .id-chip:hover .id-chip-x,
+    .id-swatch:hover + .id-swatch-x,
+    .id-swatch-wrap:hover .id-swatch-x { opacity: 1 }
+    .id-chip-x:hover, .id-swatch-x:hover { color: #c08080; background: #2a1a1a }
+    .id-swatch-wrap { position: relative; flex-shrink: 0 }
+
+    /* REF CARD: remove image + style select */
+    .ref-img-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(10,10,10,.65);
+      border: 1px solid rgba(255,255,255,.18);
+      color: #e8e8e8;
+      font-size: 11px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5
+    }
+    .ref-img-del:hover { background: #2a1a1a; border-color: #4a2a2a; color: #c08080 }
+    .ref-style-sel {
+      width: 100%;
+      margin-top: 6px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg);
+      color: var(--t2);
+      font-size: 10px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer
+    }
+    .ref-lib-btn {
+      margin-top: 5px;
+      width: 100%;
+      padding: 5px 6px;
+      border-radius: 6px;
+      border: 1px dashed var(--b2);
+      background: transparent;
+      color: var(--t4);
+      font-size: 9px;
+      cursor: pointer;
+      transition: all .15s
+    }
+    .ref-lib-btn:hover { border-color: var(--b3); color: var(--t2) }
+
+    /* GENERATION TIMER */
+    .cr-timer {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--t3);
+      letter-spacing: .04em
+    }
+    .cr-timer.done { color: #6fae7c }
+
+    /* LIBRARY SUB-TABS */
+    .lib-tabs {
+      display: flex;
+      gap: 6px;
+      margin-left: 14px
+    }
+    .lib-tab {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: transparent;
+      color: var(--t4);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif
+    }
+    .lib-tab.on { background: var(--bg4); border-color: var(--b3); color: var(--t1) }
+    .lib-tab:hover { color: var(--t2) }
+
+    .style-card {
+      background: var(--bg3);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative
+    }
+    .style-card-img-area {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: var(--bg4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden
+    }
+    .style-card-img-area img { width: 100%; height: 100%; object-fit: cover; display: block }
+    .style-card-img-empty { font-size: 20px; color: var(--t4) }
+    .style-card-body { padding: 8px 10px; display: flex; flex-direction: column; gap: 5px }
+    .style-name-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--b1);
+      color: var(--t1);
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 0;
+      outline: none
+    }
+    .style-prompt-ta {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--b1);
+      border-radius: 6px;
+      color: var(--t2);
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      padding: 5px 7px;
+      resize: none;
+      outline: none;
+      line-height: 1.5
+    }
+
+    .ref-lib-card {
+      background: var(--bg3);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s
+    }
+    .ref-lib-card:hover { border-color: var(--b3) }
+    .ref-lib-card img { width: 100%; height: 100%; object-fit: cover; display: block }
+    .ref-lib-card-empty { font-size: 18px; color: var(--t4) }
+    .ref-lib-use {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10,10,10,.55);
+      color: #f0f0f0;
+      font-size: 10px;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .15s
+    }
+    .ref-lib-card:hover .ref-lib-use { opacity: 1 }
+
+    /* MULTI API KEYS (settings) */
+    .api-key-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 8px;
+      margin-bottom: 6px
+    }
+    .api-key-row input { flex: 1 }
+    .api-key-name {
+      width: 110px;
+      flex-shrink: 0;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg);
+      color: var(--t1);
+      font-size: 11px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none
+    }
+    .api-key-input {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg);
+      color: var(--t2);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      outline: none
+    }
+    .api-key-del {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--b1);
+      background: transparent;
+      color: var(--t4);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+    .api-key-del:hover { color: #c08080; border-color: #4a2a2a; background: #2a1a1a }
+    .api-key-add {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px dashed var(--b2);
+      background: transparent;
+      color: var(--t4);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all .15s
+    }
+    .api-key-add:hover { border-color: var(--b3); color: var(--t2) }
+
+    .id-prompt-ta {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 10px;
+      color: var(--t2);
+      font-family: 'DM Mono', monospace;
+      line-height: 1.65;
+      resize: none;
+      outline: none;
+      min-height: 60px
+    }
+
+    /* connect dot on right edge */
+    .id-dot {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--b3);
+      border: 2px solid #080808;
+      cursor: crosshair;
+      z-index: 30;
+      transition: background .15s
+    }
+
+    .id-dot:hover {
+      background: var(--b5)
+    }
+
+    /* RESULT CARD */
+    .cr-card {
+      width: 230px;
+      background: linear-gradient(155deg, #0e0e0e, #141414);
+      z-index: 10
+    }
+
+    .cr-handle {
+      padding: 9px 12px 0;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .cr-handle:active {
+      cursor: grabbing
+    }
+
+    .cr-lbl {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t4)
+    }
+
+    .cr-model {
+      font-size: 9px;
+      font-family: 'DM Mono', monospace;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--bg4);
+      border: 1px solid var(--b2);
+      color: var(--t3)
+    }
+
+    .cr-body {
+      padding: 8px 12px 12px
+    }
+
+    .cr-preview {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--b1);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px
+    }
+
+    .cr-empty-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px
+    }
+
+    .cr-empty-icon {
+      font-size: 22px;
+      color: var(--t4)
+    }
+
+    .cr-empty-txt {
+      font-size: 9px;
+      color: var(--t4);
+      text-align: center
+    }
+
+    .cr-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .cr-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 7px
+    }
+
+    .cr-sel {
+      background: var(--bg);
+      border: 1px solid var(--b1);
+      border-radius: 5px;
+      color: var(--t2);
+      font-size: 9px;
+      font-family: 'DM Sans', sans-serif;
+      padding: 3px 4px;
+      outline: none;
+      cursor: pointer;
+      width: 100%
+    }
+
+    .cr-sel:hover {
+      border-color: var(--b2)
+    }
+
+    .cr-gen-btn {
+      width: 100%;
+      padding: 6px;
+      border-radius: 7px;
+      background: var(--bg4);
+      border: 1px solid var(--b2);
+      color: var(--t1);
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .cr-gen-btn:hover {
+      background: var(--bg5);
+      border-color: var(--b3)
+    }
+
+    .cr-gen-btn:active {
+      transform: scale(.98)
+    }
+
+    .cr-gen-btn.busy {
+      color: var(--t4);
+      pointer-events: none
+    }
+
+    .cr-gen-btn.stop {
+      background: #2a1a1a;
+      border-color: #4a2a2a;
+      color: #c08080
+    }
+
+    .cr-gen-btn.stop:hover {
+      background: #3a2020;
+      border-color: #6a3a3a
+    }
+
+    .cr-post {
+      display: none;
+      gap: 4px;
+      margin-top: 5px
+    }
+
+    .cr-post.show {
+      display: flex
+    }
+
+    .cr-pbtn {
+      flex: 1;
+      padding: 4px;
+      border-radius: 5px;
+      background: transparent;
+      border: 1px solid var(--b1);
+      color: var(--t3);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif
+    }
+
+    .cr-pbtn:hover {
+      border-color: var(--b2);
+      color: var(--t2)
+    }
+
+    .alter-box {
+      display: none;
+      margin-top: 5px
+    }
+
+    .alter-box.open {
+      display: block
+    }
+
+    .alter-ta {
+      width: 100%;
+      padding: 5px 7px;
+      background: var(--bg);
+      border: 1px solid var(--b1);
+      border-radius: 6px;
+      color: var(--t2);
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      resize: none;
+      outline: none;
+      line-height: 1.5
+    }
+
+    /* left connect dot */
+    .cr-dot-left {
+      position: absolute;
+      left: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--b2);
+      border: 2px solid #080808;
+      cursor: crosshair;
+      z-index: 30;
+      transition: background .15s
+    }
+
+    .cr-dot-left:hover {
+      background: var(--b4)
+    }
+
+    /* REF CARD */
+    .ref-card {
+      width: 148px;
+      background: #0c1830;
+      border-color: rgba(95,150,235,.4);
+      z-index: 25;
+      --t1: #fff; --t2: #fff; --t3: #fff; --t4: #fff;
+      color: #fff;
+    }
+    .ref-card * { color: #fff }
+
+    .ref-handle {
+      padding: 7px 10px 0;
+      cursor: grab;
+      display: flex;
+      align-items: center
+    }
+
+    .ref-handle:active {
+      cursor: grabbing
+    }
+
+    .ref-lbl {
+      font-family: 'Syne', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t4)
+    }
+
+    .ref-body {
+      padding: 5px 10px 10px
+    }
+
+    .ref-upload-box {
+      width: 100%;
+      height: 88px;
+      border: 1px dashed var(--b2);
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      background: var(--bg);
+      overflow: hidden;
+      transition: border-color .15s
+    }
+
+    .ref-upload-box:hover {
+      border-color: var(--b3)
+    }
+
+    .ref-upload-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .ref-dot {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--b2);
+      border: 2px solid #080808;
+      cursor: crosshair;
+      z-index: 30;
+      transition: background .15s
+    }
+
+    .ref-dot:hover {
+      background: var(--b4)
+    }
+
+    /* COPY CARD */
+    .copy-card {
+      width: 190px;
+      background: #271e08;
+      border-color: rgba(205,170,70,.38);
+      z-index: 25;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      --t1: #fff; --t2: #fff; --t3: #fff; --t4: #fff;
+      color: #fff;
+    }
+    .copy-card * { color: #fff }
+
+    .copy-handle {
+      padding: 7px 10px 0;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0
+    }
+
+    .copy-handle:active {
+      cursor: grabbing
+    }
+
+    .copy-lbl {
+      font-family: 'Syne', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t4)
+    }
+
+    .copy-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--t4)
+    }
+
+    .copy-body {
+      padding: 5px 10px 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .copy-ta {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 11px;
+      color: var(--t2);
+      font-family: 'DM Mono', monospace;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+      flex: 1;
+      min-height: 72px;
+      overflow-y: auto
+    }
+
+    .copy-ta::placeholder {
+      color: var(--t4)
+    }
+
+    /* RESIZE HANDLES */
+    .resize-dot {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--b4);
+      border: 2px solid var(--bg);
+      z-index: 31;
+      opacity: 0;
+      transition: opacity .15s
+    }
+    .ca-card:hover .resize-dot { opacity: 1 }
+    .rd-n { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize }
+    .rd-s { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize }
+    .rd-w { left: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize }
+    .rd-e { right: 8px; top: 50%; transform: translateY(-50%); cursor: ew-resize }
+
+    .copy-dot {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--b2);
+      border: 2px solid #080808;
+      cursor: crosshair;
+      z-index: 30;
+      transition: background .15s
+    }
+
+    .copy-dot:hover {
+      background: var(--b4)
+    }
+
+    /* CONNECTIONS */
+    .conn-hit {
+      fill: none;
+      stroke: transparent;
+      stroke-width: 14;
+      cursor: pointer;
+      pointer-events: stroke
+    }
+
+    .conn-path {
+      fill: none;
+      stroke: var(--line-col);
+      stroke-width: 1.1;
+      pointer-events: none;
+      transition: stroke .15s
+    }
+
+    .conn-group:hover .conn-path {
+      stroke: rgba(150,150,150,.5)
+    }
+
+    .conn-del {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+      cursor: pointer
+    }
+
+    .conn-group:hover .conn-del {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .conn-del-bg {
+      fill: #1e1e1e;
+      stroke: var(--b3);
+      stroke-width: 1.5;
+      transition: fill .1s, stroke .1s
+    }
+
+    .conn-del-bg:hover {
+      fill: #2a1a1a;
+      stroke: #c08080
+    }
+
+    .conn-del-x {
+      fill: var(--t3);
+      font-size: 12px;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+      font-family: sans-serif;
+      user-select: none
+    }
+
+    /* TEMP LINE */
+    #temp-svg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: visible
+    }
+
+    /* ZOOM */
+    #zoom-ctrl {
+      position: fixed;
+      bottom: 20px;
+      left: 66px;
+      z-index: 600;
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .zb {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      border: 1px solid var(--b2);
+      background: var(--bg2);
+      color: var(--t3);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      font-family: 'DM Mono', monospace
+    }
+
+    .zb:hover {
+      background: var(--bg4);
+      color: var(--t1)
+    }
+
+    #zoom-pct {
+      font-size: 8px;
+      font-family: 'DM Mono', monospace;
+      color: var(--t4);
+      text-align: center;
+      padding: 2px 0
+    }
+
+    /* ADD */
+    #add-wrap {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 600
+    }
+
+    #add-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--b3);
+      background: var(--bg3);
+      color: var(--t1);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      line-height: 1
+    }
+
+    #add-btn:hover {
+      background: var(--bg5);
+      border-color: var(--b4)
+    }
+
+    #add-menu {
+      position: absolute;
+      bottom: 46px;
+      right: 0;
+      background: var(--bg2);
+      border: 1px solid var(--b2);
+      border-radius: 10px;
+      padding: 5px;
+      min-width: 170px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .7)
+    }
+
+    #add-menu.open {
+      display: block
+    }
+
+    .am-item {
+      padding: 7px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--t2);
+      transition: all .15s
+    }
+
+    .am-item:hover {
+      background: var(--bg4);
+      color: var(--t1)
+    }
+
+    .am-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    /* WF DROPDOWN */
+    #wf-drop {
+      position: absolute;
+      top: 50px;
+      left: 60px;
+      background: var(--bg2);
+      border: 1px solid var(--b2);
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 200px;
+      display: none;
+      z-index: 800;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .7)
+    }
+
+    #wf-drop.open {
+      display: block
+    }
+
+    .wf-item {
+      padding: 7px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--t2);
+      transition: all .15s
+    }
+
+    .wf-item:hover {
+      background: var(--bg4);
+      color: var(--t1)
+    }
+
+    .wf-item.cur {
+      color: var(--t1);
+      background: var(--bg3)
+    }
+
+    .wf-acts {
+      margin-left: auto;
+      display: flex;
+      gap: 3px;
+      opacity: 0;
+      transition: opacity .15s
+    }
+
+    .wf-item:hover .wf-acts {
+      opacity: 1
+    }
+
+    .wa {
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: transparent;
+      color: var(--t4);
+      cursor: pointer;
+      font-size: 11px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .wa:hover {
+      background: var(--bg5);
+      color: var(--t2)
+    }
+
+    .wf-new {
+      padding: 7px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--t4);
+      transition: all .15s;
+      border-top: 1px solid var(--b1);
+      margin-top: 4px;
+      padding-top: 10px
+    }
+
+    .wf-new:hover {
+      color: var(--t2)
+    }
+
+    /* LOG VIEW */
+    #log-view {
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 20px
+    }
+
+    .log-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--t1);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .log-entry {
+      padding: 10px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .log-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .ls-wait {
+      background: #444
+    }
+
+    .ls-gen {
+      background: #888;
+      animation: pulse 1s infinite
+    }
+
+    .ls-done {
+      background: #5a8a5a
+    }
+
+    .ls-err {
+      background: #8a4a4a
+    }
+
+    .log-text {
+      font-size: 11px;
+      color: var(--t2);
+      font-family: 'DM Mono', monospace;
+      flex: 1
+    }
+
+    .log-time {
+      font-size: 10px;
+      color: var(--t4);
+      font-family: 'DM Mono', monospace
+    }
+
+    .log-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      gap: 8px;
+      color: var(--t4);
+      font-size: 12px
+    }
+
+    /* GALLERY VIEW */
+    #gallery-view {
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 20px
+    }
+
+    .gv-hdr {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px
+    }
+
+    .gv-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--t1)
+    }
+
+    .gv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px
+    }
+
+    .gv-card {
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .gv-card:hover {
+      border-color: var(--b2);
+      transform: translateY(-2px)
+    }
+
+    .gv-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--bg3);
+      display: block
+    }
+
+    .gv-info {
+      padding: 8px 10px
+    }
+
+    .gv-name {
+      font-size: 11px;
+      color: var(--t1);
+      font-weight: 500
+    }
+
+    .gv-date {
+      font-size: 10px;
+      color: var(--t4);
+      font-family: 'DM Mono', monospace;
+      margin-top: 2px
+    }
+
+    .gv-dl {
+      margin-top: 6px;
+      width: 100%;
+      padding: 4px;
+      border-radius: 5px;
+      border: 1px solid var(--b1);
+      background: transparent;
+      color: var(--t3);
+      font-size: 10px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s
+    }
+
+    .gv-dl:hover {
+      border-color: var(--b2);
+      color: var(--t1)
+    }
+
+    .gf {
+      padding: 3px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--b1);
+      background: transparent;
+      color: var(--t4);
+      font-size: 10px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s
+    }
+
+    .gf:hover,
+    .gf.on {
+      border-color: var(--b2);
+      color: var(--t1);
+      background: var(--bg3)
+    }
+
+    /* LIBRARY VIEW */
+    #library-view {
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 20px
+    }
+
+    .lib-hdr {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap
+    }
+
+    .lib-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--t1)
+    }
+
+    .lib-hint {
+      font-size: 11px;
+      color: var(--t4)
+    }
+
+    .lib-section { margin-bottom: 22px }
+    .lib-sec-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--t2);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px
+    }
+    .lib-sec-hint {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 10px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--t4)
+    }
+
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      align-items: start
+    }
+
+    .lib-card {
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: grab;
+      transition: border-color .15s;
+      position: relative
+    }
+
+    .lib-card:active {
+      cursor: grabbing
+    }
+
+    .lib-card:hover {
+      border-color: var(--b2)
+    }
+
+    .lib-card.dragging {
+      opacity: .45
+    }
+
+    .lib-card-img-area {
+      width: 100%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: var(--bg3);
+      display: block;
+      cursor: pointer
+    }
+
+    .lib-card-img-area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .lib-card-img-empty {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--t4)
+    }
+
+    .lib-card-body {
+      padding: 7px 9px
+    }
+
+    .lib-card-ta {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 10px;
+      color: var(--t2);
+      font-family: 'DM Mono', monospace;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      min-height: 40px
+    }
+
+    .lib-card-ta::placeholder {
+      color: var(--t4)
+    }
+
+    .lib-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: none;
+      background: rgba(0, 0, 0, .65);
+      color: var(--t3);
+      font-size: 12px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      display: none
+    }
+
+    .lib-card:hover .lib-del {
+      display: flex
+    }
+
+    .lib-del:hover {
+      color: var(--t1)
+    }
+
+    .lib-add-card {
+      background: var(--bg2);
+      border: 1px dashed var(--b2);
+      border-radius: 10px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--t4);
+      font-size: 28px;
+      min-height: 100px
+    }
+
+    .lib-add-card:hover {
+      border-color: var(--b3);
+      color: var(--t2);
+      background: var(--bg3)
+    }
+
+    /* SETTINGS VIEW */
+    #settings-view {
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 24px;
+      max-width: 500px
+    }
+
+    .sv-sec {
+      margin-bottom: 28px
+    }
+
+    .sv-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t4);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--b1)
+    }
+
+    .sv-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 8px;
+      margin-bottom: 6px
+    }
+
+    .sv-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t1);
+      flex: 1
+    }
+
+    .sv-stat {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      color: var(--t4)
+    }
+
+    .sv-stat.ok {
+      color: #6a8a6a
+    }
+
+    .sv-input {
+      width: 100%;
+      padding: 7px 10px;
+      background: var(--bg2);
+      border: 1px solid var(--b1);
+      border-radius: 7px;
+      color: var(--t1);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      outline: none;
+      margin-top: 4px;
+      transition: border-color .15s
+    }
+
+    .sv-input:focus {
+      border-color: var(--b3)
+    }
+
+    .sv-lbl {
+      font-size: 11px;
+      color: var(--t3);
+      margin-bottom: 3px;
+      display: block
+    }
+
+    .sv-save {
+      margin-top: 8px;
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: var(--bg3);
+      color: var(--t1);
+      font-size: 11px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .sv-save:hover {
+      background: var(--bg4);
+      border-color: var(--b3)
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: .4
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .spin {
+      animation: spin .7s linear infinite;
+      display: inline-block
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--b2);
+      border-radius: 4px
+    }
+
+    /* MODAL: Biblioteca de Referências (picker) */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5,5,5,.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center
+    }
+    .modal-overlay.open { display: flex }
+    .modal-box {
+      width: min(640px, 92vw);
+      max-height: 80vh;
+      background: var(--bg2);
+      border: 1px solid var(--b2);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+    .modal-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--b1)
+    }
+    .modal-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--b1);
+      background: transparent;
+      color: var(--t3);
+      cursor: pointer;
+      font-size: 14px
+    }
+    .modal-close:hover { color: var(--t1); border-color: var(--b3) }
+    .modal-body {
+      padding: 14px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sb-logo"><img src="logo.webp" alt="Cria-ativos" style="height:34px;width:auto;display:block;object-fit:contain"></div>
+      <nav class="sb-menu">
+        <div class="sb-group g-imagem">
+          <button class="sb-hdr active" data-cat="imagem" onclick="switchCat('imagem',this)">Imagem</button>
+          <div class="sb-items">
+            <button class="sb-item active" title="Storyboard" data-view="board" onclick="nav('board',this)">Storyboard</button>
+            <button class="sb-item" title="Log de Geração" data-view="log" onclick="nav('log',this)">Log</button>
+            <button class="sb-item" title="Galeria" data-view="gallery" onclick="nav('gallery',this)">Galeria</button>
+            <button class="sb-item" title="Biblioteca" data-view="library" onclick="nav('library',this)">Biblioteca</button>
+          </div>
+        </div>
+        <div class="sb-group g-post">
+          <button class="sb-hdr" data-cat="post" onclick="switchCat('post',this)">Post</button>
+        </div>
+        <div class="sb-group g-video">
+          <button class="sb-hdr" data-cat="video" onclick="switchCat('video',this)">Vídeo</button>
+        </div>
+        <div class="sb-group g-config">
+          <button class="sb-hdr" data-cat="config" onclick="switchCat('config',this)">Configuração</button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- MAIN -->
+    <div id="main">
+      <div id="topbar">
+        <div id="brand"><img src="logo.webp" alt="Cria-ativos" style="height:26px;width:auto;display:block;object-fit:contain"></div>
+        <div style="width:1px;height:14px;background:var(--b1)"></div>
+        <button id="wf-btn" onclick="toggleWfDrop()">
+          <span style="font-size:9px;color:var(--t4)">▼</span>
+          <span id="wf-name" style="font-weight:500;color:var(--t1);font-size:12px">Workflow 1</span>
+        </button>
+        <div id="wf-drop">
+          <div id="wf-list"></div>
+          <div class="wf-new" onclick="newWorkflow()"><span>+</span> Novo workflow</div>
+        </div>
+
+        <div id="api-status-wrap">
+          <button id="api-status-btn" onclick="toggleApiStatusDrop()">
+            <span id="api-status-dot" class="api-led led-yellow"></span>
+            <span style="font-size:10px;color:var(--t3)">APIs</span>
+          </button>
+          <div id="api-status-drop">
+            <div class="asd-title">Status das APIs</div>
+            <div id="api-status-list"></div>
+          </div>
+        </div>
+
+        <div id="tb-right">
+          <button class="tb-btn" onclick="clearConns()">Limpar linhas</button>
+          <button class="tb-btn" onclick="autoConnect()">Auto-conectar</button>
+          <span id="sync-dot" title="Sincronizado" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--t4);padding:0 6px">
+            <span id="sync-icon" style="font-size:8px">●</span><span id="sync-label">cloud</span>
+          </span>
+          <select class="tb-sel" id="gen-api-sel" title="Chave de API usada para gerar" onchange="setActiveApiKey(this.value)"></select>
+          <button class="tb-btn hi" id="gen-all-btn" onclick="genAll()">⚡ Gerar todos</button>
+        </div>
+      </div>
+
+      <!-- BOARD -->
+      <div id="board-view" class="view active">
+        <svg id="svg-back"></svg>
+        <div id="canvas"></div>
+      </div>
+
+      <!-- LOG -->
+      <div id="log-view" class="view">
+        <div class="log-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h10" />
+          </svg>
+          Log de Geração
+          <button class="tb-btn" style="margin-left:auto;font-size:10px"
+            onclick="logEntries=[];renderLog()">Limpar</button>
+        </div>
+        <div id="log-entries"></div>
+      </div>
+
+      <!-- GALLERY -->
+      <div id="gallery-view" class="view">
+        <div class="gv-hdr">
+          <span class="gv-title">Criativos Gerados</span>
+          <div style="display:flex;gap:6px">
+            <button class="gf on" onclick="filterGallery('all',this)">Todos</button>
+            <button class="gf" onclick="filterGallery('today',this)">Hoje</button>
+            <button class="gf" onclick="filterGallery('week',this)">Semana</button>
+          </div>
+          <button class="tb-btn hi" style="margin-left:auto" onclick="dlAll()">⬇ Baixar todos</button>
+        </div>
+        <div class="gv-grid" id="gv-grid"></div>
+      </div>
+
+      <!-- LIBRARY -->
+      <div id="library-view" class="view">
+        <div class="lib-hdr">
+          <span class="lib-title">Biblioteca</span>
+        </div>
+        <div class="lib-section">
+          <div class="lib-sec-title">Estilos <span class="lib-sec-hint">Defina nome, imagem e prompt de cada estilo — usado no dropdown dos cards de referência</span></div>
+          <div class="lib-grid" id="style-grid"></div>
+        </div>
+        <div class="lib-section">
+          <div class="lib-sec-title">Referências <span class="lib-sec-hint">Clique na imagem para upload • Arraste para reordenar • Use no card de Referência</span></div>
+          <div class="lib-grid" id="lib-grid"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settings-view" class="view">
+        <div class="sv-sec">
+          <div class="sv-title">APIs de Imagem</div>
+          <div class="sv-row">
+            <div>
+              <div class="sv-name">GPT-Image / DALL-E (OpenAI)</div>
+              <div class="sv-stat ok" id="api-stat">● Configurada</div>
+            </div>
+          </div>
+          <div
+            style="padding:10px 12px;background:var(--bg2);border:1px solid var(--b1);border-radius:8px;margin-bottom:6px">
+            <label class="sv-lbl">API Key OpenAI</label>
+            <input class="sv-input" id="oai-key" type="password" placeholder="sk-...">
+            <button class="sv-save" onclick="saveKey()">Salvar chave</button>
+          </div>
+          <div class="sv-row" style="opacity:.5">
+            <div>
+              <div class="sv-name">Stability AI</div>
+              <div class="sv-stat">● Não configurada</div>
+            </div>
+          </div>
+        </div>
+        <div class="sv-sec">
+          <div class="sv-title">Contas de API (múltiplas chaves)</div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:8px">Cadastre várias chaves nomeadas (ex: "API Pedro", "API Lucas") e escolha qual usar ao gerar. As chaves ficam salvas só neste navegador — nunca são enviadas para a nuvem.</div>
+          <div id="api-accounts-list"></div>
+          <button class="api-key-add" onclick="addApiAccount()">+ Adicionar conta de API</button>
+        </div>
+        <div class="sv-sec">
+          <div class="sv-title">Modelo Padrão</div>
+          <select class="sv-input" id="def-model" style="width:auto" onchange="refreshResultCards()">
+            <option value="gpt-image-2">GPT-Image-2</option>
+            <option value="gpt-image-1">GPT-Image-1</option>
+            <option value="dall-e-3">DALL-E 3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PLACEHOLDER (Vídeo / Post) -->
+      <div id="placeholder-view" class="view">
+        <div class="ph-wrap">
+          <div class="ph-icon" id="ph-icon"></div>
+          <div class="ph-title" id="ph-title"></div>
+          <div class="ph-sub">Em construção — em breve</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZOOM -->
+  <div id="zoom-ctrl">
+    <button class="zb" onclick="doZoom(1.15)">+</button>
+    <div id="zoom-pct">100%</div>
+    <button class="zb" onclick="doZoom(1/1.15)">−</button>
+    <button class="zb" onclick="resetView()">⊙</button>
+  </div>
+
+  <!-- ADD -->
+  <div id="add-wrap">
+    <div id="add-menu">
+      <div class="am-item" onclick="spawnCard('result');closeAdd()">
+        <div class="am-dot" style="background:#333"></div>Card Resultado
+      </div>
+      <div class="am-item" onclick="spawnCard('ref');closeAdd()">
+        <div class="am-dot" style="background:#2a2a2a"></div>Referência
+      </div>
+      <div class="am-item" onclick="spawnCard('copy');closeAdd()">
+        <div class="am-dot" style="background:#222"></div>Copy
+      </div>
+    </div>
+    <button id="add-btn" onclick="document.getElementById('add-menu').classList.toggle('open')">+</button>
+  </div>
+
+  <!-- BIBLIOTECA DE REFERÊNCIAS (modal picker) -->
+  <div id="ref-lib-modal" class="modal-overlay" onclick="if(event.target===this)closeRefLibModal()">
+    <div class="modal-box">
+      <div class="modal-hdr">
+        <div class="lib-tabs">
+          <button class="lib-tab" data-mtab="styles" onclick="switchLibModalTab('styles',this)">Estilos</button>
+          <button class="lib-tab on" data-mtab="refs" onclick="switchLibModalTab('refs',this)">Referências</button>
+        </div>
+        <button class="modal-close" onclick="closeRefLibModal()">×</button>
+      </div>
+      <div id="ref-lib-modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TEMP LINE -->
+  <svg id="temp-svg">
+    <line id="temp-line" x1="-1" y1="-1" x2="-1" y2="-1" stroke="#555" stroke-width="1.2" stroke-dasharray="5,3" />
+  </svg>
+
+  <script>
+    /* ═══ GLOBALS ═══ */
+    let scale = 1, panX = 0, panY = 0;
+    let isPan = false, panStart = { x: 0, y: 0 };
+    let dragId = null, dragOff = { x: 0, y: 0 };
+    let resizingId = null, resizeDir = null, resizeOrigin = null, resizeDims = null;
+    let connFrom = null, connDotEl = null;
+    let cards = {};
+    let conns = [];
+    let zCounter = 50;
+    let uidCounter = 1;
+    let logEntries = [];
+    let genImgs = {};
+    let abortControllers = {};
+    let genTimers = {};
+    let genAllAbort = false;
+    let libItems = [];
+    let libDragIdx = null;
+    let workflows = [{ id: 'wf1', name: 'Workflow 1', cards: {}, conns: [], pan: { x: 0, y: 0 }, scale: 1 }];
+    let currentWf = 'wf1';
+    let galleryItems = [];      // { gid, cardId, url, date, ts } — full generation history
+    let styleItems = [];        // { name, img, prompt } — biblioteca de estilos
+    let refLibTarget = null;    // card de referência alvo do modal de biblioteca
+    let refLibTab = 'refs';     // aba ativa no modal de biblioteca de referências
+    let apiAccounts = [];       // { id, name, key, status: 'green'|'yellow'|'red' }
+    let activeApiId = null;     // conta de API selecionada para "Gerar todos"
+
+    const canvas = document.getElementById('canvas');
+    const svgBack = document.getElementById('svg-back');
+    const boardView = document.getElementById('board-view');
+    const tempLine = document.getElementById('temp-line');
+
+    function uid() { return uidCounter++ }
+    // Evita colisão de IDs entre cards salvos e novos cards criados na sessão
+    // (causa de corrupção de estado / conexões "perdidas" após F5)
+    function bumpUid(ids) {
+      ids.forEach(s => {
+        const m = /_(\d+)$/.exec(String(s || ''));
+        if (m) { const n = parseInt(m[1], 10); if (n >= uidCounter) uidCounter = n + 1; }
+      });
+    }
+
+    function fmtDuration(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return m > 0 ? `${m}m ${String(r).padStart(2, '0')}s` : `${r}s`;
+    }
+    function startGenTimer(id) {
+      stopGenTimer(id);
+      const start = Date.now();
+      const el = document.getElementById('cr-timer-' + id);
+      if (el) { el.classList.remove('done'); el.textContent = '0s'; }
+      genTimers[id] = setInterval(() => {
+        const el = document.getElementById('cr-timer-' + id);
+        if (el) el.textContent = fmtDuration(Date.now() - start);
+      }, 1000);
+      genTimers[id + '_start'] = start;
+    }
+    function stopGenTimer(id, finalize) {
+      if (genTimers[id]) { clearInterval(genTimers[id]); delete genTimers[id]; }
+      if (finalize) {
+        const start = genTimers[id + '_start'];
+        const el = document.getElementById('cr-timer-' + id);
+        if (el && start) { el.textContent = fmtDuration(Date.now() - start); el.classList.add('done'); }
+      }
+      delete genTimers[id + '_start'];
+    }
+
+    /* ═══ TRANSFORM ═══ */
+    function applyTransform() {
+      const t = `translate(${panX}px,${panY}px) scale(${scale})`;
+      canvas.style.transform = t;
+      svgBack.style.transform = t;
+      document.getElementById('zoom-pct').textContent = Math.round(scale * 100) + '%';
+    }
+
+    function doZoom(factor, cx, cy) {
+      const r = boardView.getBoundingClientRect();
+      const ox = cx !== undefined ? cx : r.width / 2;
+      const oy = cy !== undefined ? cy : r.height / 2;
+      const ns = Math.max(0.08, Math.min(4, scale * factor));
+      panX = ox - (ox - panX) * (ns / scale);
+      panY = oy - (oy - panY) * (ns / scale);
+      scale = ns;
+      applyTransform();
+    }
+
+    function resetView() {
+      scale = 0.72; panX = 60; panY = 60;
+      applyTransform();
+    }
+
+    /* ═══ PAN ═══ */
+    boardView.addEventListener('wheel', e => {
+      e.preventDefault();
+      const r = boardView.getBoundingClientRect();
+      doZoom(e.deltaY < 0 ? 1.1 : 0.91, e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+
+    boardView.addEventListener('mousedown', e => {
+      const t = e.target;
+      const isBackground = !t.closest('.conn-del') && (t === boardView || t === canvas || t === svgBack || t.tagName === 'svg' || t.closest('.conn-group'));
+      if (isBackground && !connFrom) {
+        isPan = true;
+        panStart = { x: e.clientX - panX, y: e.clientY - panY };
+        boardView.style.cursor = 'grabbing';
+      }
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (isPan) {
+        panX = e.clientX - panStart.x;
+        panY = e.clientY - panStart.y;
+        applyTransform();
+      }
+      if (dragId) {
+        const r = boardView.getBoundingClientRect();
+        const cx = (e.clientX - r.left - panX) / scale;
+        const cy = (e.clientY - r.top - panY) / scale;
+        const el = document.getElementById(dragId);
+        if (el) {
+          const nx = cx - dragOff.x;
+          const ny = cy - dragOff.y;
+          el.style.left = nx + 'px';
+          el.style.top = ny + 'px';
+          cards[dragId].x = nx;
+          cards[dragId].y = ny;
+          drawLines();
+        }
+      }
+      if (resizingId) {
+        const r = boardView.getBoundingClientRect();
+        const cx = (e.clientX - r.left - panX) / scale;
+        const cy = (e.clientY - r.top - panY) / scale;
+        const dx = cx - resizeOrigin.x;
+        const dy = cy - resizeOrigin.y;
+        const el = document.getElementById(resizingId);
+        if (el) {
+          const MIN_W = 130, MIN_H = 80;
+          if (resizeDir === 'right') {
+            const nw = Math.max(MIN_W, resizeDims.w + dx);
+            el.style.width = nw + 'px';
+            cards[resizingId].data.width = nw;
+          } else if (resizeDir === 'left') {
+            const nw = Math.max(MIN_W, resizeDims.w - dx);
+            const nx = resizeDims.x + (resizeDims.w - nw);
+            el.style.width = nw + 'px';
+            el.style.left = nx + 'px';
+            cards[resizingId].x = nx;
+            cards[resizingId].data.width = nw;
+          } else if (resizeDir === 'bottom') {
+            const nh = Math.max(MIN_H, resizeDims.h + dy);
+            el.style.height = nh + 'px';
+            cards[resizingId].data.height = nh;
+          } else if (resizeDir === 'top') {
+            const nh = Math.max(MIN_H, resizeDims.h - dy);
+            const ny = resizeDims.y + (resizeDims.h - nh);
+            el.style.height = nh + 'px';
+            el.style.top = ny + 'px';
+            cards[resizingId].y = ny;
+            cards[resizingId].data.height = nh;
+          }
+          drawLines();
+        }
+      }
+      if (connFrom && connDotEl) {
+        const dr = connDotEl.getBoundingClientRect();
+        tempLine.setAttribute('x1', dr.left + dr.width / 2);
+        tempLine.setAttribute('y1', dr.top + dr.height / 2);
+        tempLine.setAttribute('x2', e.clientX);
+        tempLine.setAttribute('y2', e.clientY);
+      }
+    });
+
+    document.addEventListener('mouseup', e => {
+      if (isPan) { isPan = false; boardView.style.cursor = 'default'; saveCurrentWf(); }
+      if (dragId) { saveCurrentWf(); dragId = null; } else { dragId = null; }
+      if (resizingId) {
+        saveCurrentWf();
+        resizingId = null; resizeDir = null; resizeOrigin = null; resizeDims = null;
+      }
+      if (connFrom) {
+        tempLine.setAttribute('x1', -1); tempLine.setAttribute('y1', -1);
+        tempLine.setAttribute('x2', -1); tempLine.setAttribute('y2', -1);
+        const under = document.elementFromPoint(e.clientX, e.clientY);
+        const dot = under && (under.classList.contains('cr-dot-left') || under.classList.contains('ref-dot') || under.classList.contains('copy-dot') || under.classList.contains('id-dot'))
+          ? under
+          : under && under.closest('[data-cid]');
+        if (dot && dot.dataset.cid && dot.dataset.cid !== connFrom) {
+          addConn(connFrom, dot.dataset.cid);
+        }
+        connFrom = null; connDotEl = null;
+      }
+    });
+
+    /* ═══ LINES ═══ */
+    function getCardEdges(id) {
+      const c = cards[id];
+      const el = document.getElementById(id);
+      if (!c || !el) return null;
+      const w = el.offsetWidth || 200;
+      const h = el.offsetHeight || 100;
+      return {
+        rightX: c.x + w, rightY: c.y + h / 2,
+        leftX: c.x, leftY: c.y + h / 2,
+        centerX: c.x + w / 2, centerY: c.y + h / 2
+      };
+    }
+
+    function drawLines() {
+      svgBack.innerHTML = '';
+      const NS = 'http://www.w3.org/2000/svg';
+      conns.forEach(cn => {
+        const f = getCardEdges(cn.from);
+        const t = getCardEdges(cn.to);
+        if (!f || !t) return;
+        const x1 = f.rightX, y1 = f.rightY;
+        const x2 = t.leftX,  y2 = t.leftY;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const d  = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+
+        const g = document.createElementNS(NS, 'g');
+        g.setAttribute('class', 'conn-group');
+
+        // Wide invisible stroke for easy hover
+        const hit = document.createElementNS(NS, 'path');
+        hit.setAttribute('d', d);
+        hit.setAttribute('class', 'conn-hit');
+
+        // Visible line
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('d', d);
+        p.setAttribute('class', 'conn-path');
+
+        // Delete button at midpoint
+        const del = document.createElementNS(NS, 'g');
+        del.setAttribute('class', 'conn-del');
+        del.setAttribute('transform', `translate(${mx},${my})`);
+
+        const hitCircle = document.createElementNS(NS, 'circle');
+        hitCircle.setAttribute('r', '12');
+        hitCircle.setAttribute('fill', 'transparent');
+
+        const bg = document.createElementNS(NS, 'circle');
+        bg.setAttribute('r', '7');
+        bg.setAttribute('class', 'conn-del-bg');
+
+        const txt = document.createElementNS(NS, 'text');
+        txt.setAttribute('class', 'conn-del-x');
+        txt.setAttribute('x', '0');
+        txt.setAttribute('y', '0');
+        txt.textContent = '×';
+
+        del.appendChild(hitCircle);
+        del.appendChild(bg);
+        del.appendChild(txt);
+
+        del.addEventListener('click', e => {
+          e.stopPropagation();
+          conns = conns.filter(x => x.id !== cn.id);
+          drawLines();
+          saveCurrentWf();
+        });
+
+        g.appendChild(hit);
+        g.appendChild(p);
+        g.appendChild(del);
+        svgBack.appendChild(g);
+      });
+    }
+
+    function addConn(from, to) {
+      if (conns.find(c => c.from === from && c.to === to)) return;
+      conns.push({ from, to, id: 'c' + uid() });
+      drawLines();
+      saveCurrentWf();
+    }
+
+    function clearConns() {
+      if (confirm('Limpar todas as conexões?')) { conns = []; drawLines(); saveCurrentWf(); }
+    }
+
+    function autoConnect() {
+      const ids = Object.keys(cards);
+      const identity = ids.find(id => cards[id].type === 'identity');
+      const results = ids.filter(id => cards[id].type === 'result');
+      const copies = ids.filter(id => cards[id].type === 'copy');
+      const refs = ids.filter(id => cards[id].type === 'ref');
+      if (identity) results.forEach(rid => addConn(identity, rid));
+      copies.forEach((cid, i) => { if (results[i]) addConn(cid, results[i]) });
+      refs.forEach((rfid, i) => { if (results[i]) addConn(rfid, results[i]) });
+      drawLines();
+      saveCurrentWf();
+    }
+
+    /* ═══ CARD CREATION ═══ */
+    function spawnCard(type, x, y, id, data) {
+      const cid = id || (type + '_' + uid());
+      // Sensible default positions
+      let cx = x, cy = y;
+      if (cx === undefined) {
+        const r = boardView.getBoundingClientRect();
+        cx = (-panX / scale) + (r.width / scale) * 0.45 + Math.random() * 100;
+        cy = (-panY / scale) + (r.height / scale) * 0.35 + Math.random() * 80;
+      }
+      cards[cid] = { type, x: cx, y: cy, data: data || {} };
+      if (type === 'identity') {
+        if (!cards[cid].data.fonts) cards[cid].data.fonts = ['Syne', 'DM Mono'];
+        if (!cards[cid].data.colors) cards[cid].data.colors = ['#e0e0e0', '#1a1a1a', '#666666'];
+      }
+
+      const wrap = document.createElement('div');
+      wrap.id = cid;
+      wrap.className = 'ca-card ' + (
+        type === 'identity' ? 'identity-card' :
+          type === 'result' ? 'cr-card' :
+            type === 'ref' ? 'ref-card' :
+              'copy-card'
+      );
+      let styleStr = `left:${cx}px;top:${cy}px;z-index:${type === 'identity' ? 20 : type === 'ref' || type === 'copy' ? 25 : 10}`;
+      if (data?.width) styleStr += `;width:${data.width}px`;
+      if (data?.height) styleStr += `;height:${data.height}px`;
+      wrap.style.cssText = styleStr;
+
+      wrap.innerHTML = buildInnerHTML(type, cid, data || {});
+      canvas.appendChild(wrap);
+
+      // Bind drag handle
+      const handle = wrap.querySelector('[data-handle]');
+      if (handle) {
+        handle.addEventListener('mousedown', e => {
+          if (e.button !== 0) return;
+          e.stopPropagation();
+          dragId = cid;
+          wrap.style.zIndex = zCounter++;
+          const r = boardView.getBoundingClientRect();
+          const cx2 = (e.clientX - r.left - panX) / scale;
+          const cy2 = (e.clientY - r.top - panY) / scale;
+          dragOff = { x: cx2 - cards[cid].x, y: cy2 - cards[cid].y };
+        });
+      }
+
+      // Bind connect dots
+      wrap.querySelectorAll('[data-cid]').forEach(dot => {
+        dot.addEventListener('mousedown', e => {
+          if (e.button !== 0) return;
+          e.stopPropagation();
+          connFrom = cid;
+          connDotEl = dot;
+        });
+      });
+
+      // Bind resize dots (copy cards only)
+      if (type === 'copy') {
+        wrap.querySelectorAll('[data-resize]').forEach(dot => {
+          dot.addEventListener('mousedown', e => {
+            if (e.button !== 0) return;
+            e.stopPropagation();
+            resizingId = cid;
+            resizeDir = dot.dataset.resize;
+            const r = boardView.getBoundingClientRect();
+            resizeOrigin = {
+              x: (e.clientX - r.left - panX) / scale,
+              y: (e.clientY - r.top - panY) / scale
+            };
+            const el = document.getElementById(cid);
+            resizeDims = {
+              w: el ? el.offsetWidth : (cards[cid].data.width || 190),
+              h: el ? el.offsetHeight : (cards[cid].data.height || 120),
+              x: cards[cid].x,
+              y: cards[cid].y
+            };
+          });
+        });
+      }
+
+      // Right-click to remove (not identity)
+      if (type !== 'identity') {
+        wrap.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          if (confirm('Remover este card?')) {
+            wrap.remove();
+            delete cards[cid];
+            conns = conns.filter(c => c.from !== cid && c.to !== cid);
+            drawLines();
+            saveCurrentWf();
+          }
+        });
+      }
+
+      // Save after spawning a new card (when user adds from menu, not from loadWf)
+      if (!id) saveCurrentWf();
+      if (type === 'result') refreshResultCards();
+
+      setTimeout(() => drawLines(), 30);
+      return cid;
+    }
+
+    /* ═══ HTML BUILDERS ═══ */
+    function buildInnerHTML(type, id, data) {
+      if (type === 'identity') return buildIdentity(id, data);
+      if (type === 'result') return buildResult(id, data);
+      if (type === 'ref') return buildRef(id, data);
+      if (type === 'copy') return buildCopy(id, data);
+      return '';
+    }
+
+    function buildIdentity(id, data) {
+      const refsHtml = (data.idRefs || []).map((r, ri) => `<div class="id-ref-item"><img src="${r.url}" class="id-ref-img"><span class="id-ref-name">${r.name}</span><button class="id-ref-del" onclick="this.closest('.id-ref-item').remove();if(cards['${id}']){cards['${id}'].data.idRefs.splice(${ri},1);saveCurrentWf()}">×</button></div>`).join('');
+      const tog = data.idToggles || {};
+      const on = k => tog[k] !== false;
+      const tgl = k => `<div class="id-toggle${on(k) ? ' on' : ''}" onclick="toggleIdSection('${id}','${k}',this)" title="${on(k) ? 'Enviando para IA' : 'Desativado'}"></div>`;
+      return `
+  <div style="padding:10px 13px 8px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)">Identidade Visual</span>
+  </div>
+
+  <div class="id-section">
+    <div class="id-sec-hdr"><div class="id-sec-label">Logotipo</div>${tgl('logo')}</div>
+    <div id="id-sc-logo-${id}"${!on('logo') ? ' class="id-sc-off"' : ''}>
+      <label style="cursor:pointer;display:block">
+        <div id="id-logo-${id}" class="id-upload-box">
+          ${data.logoUrl ? `<img src="${data.logoUrl}" style="max-height:52px;max-width:100%;object-fit:contain;padding:4px">` : `<span style="font-size:16px;color:var(--t4)">⊕</span><span style="font-size:9px;color:var(--t4)">Upload logo</span>`}
+        </div>
+        <input type="file" accept="image/*" style="display:none" onchange="handleLogo(event,'${id}')">
+      </label>
+    </div>
+  </div>
+
+  <div class="id-section">
+    <div class="id-sec-hdr"><div class="id-sec-label">Fontes</div>${tgl('fonts')}</div>
+    <div id="id-sc-fonts-${id}"${!on('fonts') ? ' class="id-sc-off"' : ''}>
+      <div id="id-fonts-${id}" class="id-chips">
+        ${fontsChipsHtml(id, data.fonts || ['Syne', 'DM Mono'])}
+      </div>
+    </div>
+  </div>
+
+  <div class="id-section">
+    <div class="id-sec-hdr"><div class="id-sec-label">Paleta de Cores</div>${tgl('colors')}</div>
+    <div id="id-sc-colors-${id}"${!on('colors') ? ' class="id-sc-off"' : ''}>
+      <div id="id-colors-${id}" class="id-colors">
+        ${colorSwatchesHtml(id, data.colors || ['#e0e0e0', '#1a1a1a', '#666666'])}
+      </div>
+    </div>
+  </div>
+
+  <div class="id-section">
+    <div class="id-sec-hdr"><div class="id-sec-label">Referências Visuais</div>${tgl('refs')}</div>
+    <div id="id-sc-refs-${id}"${!on('refs') ? ' class="id-sc-off"' : ''}>
+      <div id="id-refs-${id}" class="id-ref-list">${refsHtml}</div>
+      <label style="cursor:pointer;display:block;margin-top:5px">
+        <div style="padding:5px 8px;border:1px dashed var(--b2);border-radius:6px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t4);transition:border-color .15s"
+             onmouseover="this.style.borderColor='var(--b3)'" onmouseout="this.style.borderColor='var(--b2)'">
+          <span style="font-size:13px">⊕</span> Adicionar referência
+        </div>
+        <input type="file" accept="image/*" style="display:none" onchange="handleIdRef(event,'${id}')">
+      </label>
+    </div>
+  </div>
+
+  <div class="id-section" style="border-bottom:none">
+    <div class="id-sec-hdr"><div class="id-sec-label">Prompt Base</div>${tgl('prompt')}</div>
+    <div id="id-sc-prompt-${id}"${!on('prompt') ? ' class="id-sc-off"' : ''}>
+      <textarea class="id-prompt-ta" placeholder="Instruções gerais de identidade visual..." oninput="cards['${id}']&&(cards['${id}'].data.promptBase=this.value);saveCurrentWf()">${data.promptBase || 'Seguir exatamente a paleta de cores e estilo visual da marca. Usar a logo fornecida. Manter coerência visual com as referências de estilo.'}</textarea>
+    </div>
+  </div>
+
+  <div class="id-dot" data-cid="${id}"></div>`;
+    }
+
+    const MODEL_CAPS = {
+      'dall-e-3': {
+        sizes: [
+          { value: '1024x1024', label: 'Quadrado' },
+          { value: '1024x1792', label: 'Stories 9:16' },
+          { value: '1792x1024', label: 'Paisagem 16:9' }
+        ],
+        quality: [
+          { value: 'standard', label: 'Padrão' },
+          { value: 'hd', label: 'HD' }
+        ],
+        maxN: 1
+      },
+      'gpt-image-1': {
+        sizes: [
+          { value: '1024x1024', label: 'Quadrado' },
+          { value: '1024x1536', label: 'Stories 2:3' },
+          { value: '1536x1024', label: 'Paisagem 3:2' }
+        ],
+        quality: [
+          { value: 'low',    label: 'Baixa' },
+          { value: 'medium', label: 'Média' },
+          { value: 'high',   label: 'Alta' }
+        ],
+        maxN: 4
+      },
+      'gpt-image-2': {
+        sizes: [
+          { value: '1024x1024', label: 'Quadrado' },
+          { value: '1024x1536', label: 'Stories 2:3' },
+          { value: '1536x1024', label: 'Paisagem 3:2' }
+        ],
+        quality: [
+          { value: 'low',    label: 'Baixa' },
+          { value: 'medium', label: 'Média' },
+          { value: 'high',   label: 'Alta' }
+        ],
+        maxN: 4
+      }
+    };
+
+    function refreshResultCards() {
+      const model = document.getElementById('def-model')?.value || 'dall-e-3';
+      const caps = MODEL_CAPS[model] || MODEL_CAPS['dall-e-3'];
+      Object.keys(cards).filter(id => cards[id]?.type === 'result').forEach(id => {
+        const mdlEl = document.getElementById('cr-mdl-' + id);
+        if (mdlEl) mdlEl.textContent = model;
+
+        const fmtSel = document.getElementById('cr-f-' + id);
+        if (fmtSel) {
+          const cur = fmtSel.value;
+          fmtSel.innerHTML = caps.sizes.map(s =>
+            `<option value="${s.value}"${s.value === cur ? ' selected' : ''}>${s.label}</option>`
+          ).join('');
+          if (!caps.sizes.find(s => s.value === cur)) fmtSel.value = caps.sizes[0].value;
+        }
+
+        const qlSel = document.getElementById('cr-ql-' + id);
+        if (qlSel) {
+          const cur = qlSel.value;
+          qlSel.innerHTML = caps.quality.map(q =>
+            `<option value="${q.value}"${q.value === cur ? ' selected' : ''}>${q.label}</option>`
+          ).join('');
+          if (!caps.quality.find(q => q.value === cur)) qlSel.value = caps.quality[0].value;
+        }
+
+        const qtySel = document.getElementById('cr-q-' + id);
+        if (qtySel) {
+          const cur = parseInt(qtySel.value) || 1;
+          qtySel.innerHTML = Array.from({ length: caps.maxN }, (_, i) => i + 1)
+            .map(v => `<option${cur === v ? ' selected' : ''}>${v}</option>`).join('');
+          if (cur > caps.maxN) qtySel.value = '1';
+        }
+      });
+    }
+
+    function buildResult(id, data) {
+      const model = document.getElementById('def-model')?.value || 'dall-e-3';
+      const caps = MODEL_CAPS[model] || MODEL_CAPS['dall-e-3'];
+      const defFmt = data.fmt || '1024x1024';
+      const defQl  = data.ql  || caps.quality[0].value;
+      const defQty = data.qty || '1';
+      const sizeOpts = caps.sizes.map(s =>
+        `<option value="${s.value}"${s.value === defFmt ? ' selected' : ''}>${s.label}</option>`
+      ).join('');
+      const qualOpts = caps.quality.map(q =>
+        `<option value="${q.value}"${q.value === defQl ? ' selected' : ''}>${q.label}</option>`
+      ).join('');
+      const qtyOpts = Array.from({ length: caps.maxN }, (_, i) => i + 1)
+        .map(v => `<option${defQty === String(v) ? ' selected' : ''}>${v}</option>`).join('');
+      return `
+  <div class="cr-handle" data-handle>
+    <span class="cr-lbl">Resultado</span>
+    <span class="cr-timer" id="cr-timer-${id}"></span>
+    <span class="cr-model" id="cr-mdl-${id}">${model}</span>
+  </div>
+  <div class="cr-body">
+    <div class="cr-preview" id="cr-prev-${id}">
+      ${genImgs[id]?.url ? `<img src="${genImgs[id].url}" style="width:100%;height:100%;object-fit:cover">` : `
+      <div class="cr-empty-wrap">
+        <div class="cr-empty-icon">⊡</div>
+        <div class="cr-empty-txt">Aguardando geração</div>
+      </div>
+      `}
+    </div>
+    <div class="cr-controls">
+      <select class="cr-sel" id="cr-q-${id}" onchange="cards['${id}']&&(cards['${id}'].data.qty=this.value);saveCurrentWf()">
+        ${qtyOpts}
+      </select>
+      <select class="cr-sel" id="cr-f-${id}" onchange="cards['${id}']&&(cards['${id}'].data.fmt=this.value);saveCurrentWf()">
+        ${sizeOpts}
+      </select>
+      <select class="cr-sel" id="cr-ql-${id}" onchange="cards['${id}']&&(cards['${id}'].data.ql=this.value);saveCurrentWf()">
+        ${qualOpts}
+      </select>
+    </div>
+    <button class="cr-gen-btn" id="cr-gen-${id}" onclick="genCard('${id}')">⚡ GERAR</button>
+    <div class="cr-post" id="cr-post-${id}">
+      <button class="cr-pbtn" onclick="dlCard('${id}')">⬇ Baixar</button>
+      <button class="cr-pbtn" onclick="toggleAlter('${id}')">✎ Alterar</button>
+    </div>
+    <div class="alter-box" id="alter-${id}">
+      <textarea class="alter-ta" rows="2" placeholder="Instruções de ajuste..."></textarea>
+      <button class="cr-gen-btn" style="margin-top:4px" onclick="genCard('${id}',true)">⚡ REGERAR</button>
+    </div>
+  </div>
+  <div class="cr-dot-left" data-cid="${id}"></div>`;
+    }
+
+    function buildRef(id, data) {
+      const styleOpts = styleItems.map(s => `<option value="${s.name}"${data.style === s.name ? ' selected' : ''}>${s.name}</option>`).join('');
+      return `
+  <div class="ref-handle" data-handle>
+    <span class="ref-lbl">Referência</span>
+  </div>
+  <div class="ref-body">
+    <div style="position:relative">
+      <label style="cursor:pointer;display:block">
+        <div id="ref-box-${id}" class="ref-upload-box">
+          ${data.refUrl ? `<img src="${data.refUrl}">` : `<span style="font-size:16px;color:var(--t4)">⊕</span><span style="font-size:9px;color:var(--t4)">Upload imagem</span>`}
+        </div>
+        <input type="file" accept="image/*" style="display:none" onchange="handleRef(event,'${id}')">
+      </label>
+      <button class="ref-img-del" id="ref-del-${id}" style="display:${data.refUrl ? 'flex' : 'none'}" onclick="removeRefImg('${id}')" title="Remover imagem">×</button>
+    </div>
+    <button class="ref-lib-btn" onclick="openRefLibModal('${id}')">📚 Biblioteca de referências</button>
+    <select class="ref-style-sel" onchange="cards['${id}']&&(cards['${id}'].data.style=this.value);saveCurrentWf()">
+      <option value="">Estilo: nenhum</option>
+      ${styleOpts}
+    </select>
+  </div>
+  <div class="ref-dot" data-cid="${id}"></div>`;
+    }
+
+    function buildCopy(id, data) {
+      const n = Object.keys(cards).filter(k => cards[k] && cards[k].type === 'copy').length;
+      return `
+  <div class="resize-dot rd-n" data-resize="top"></div>
+  <div class="resize-dot rd-s" data-resize="bottom"></div>
+  <div class="resize-dot rd-w" data-resize="left"></div>
+  <div class="resize-dot rd-e" data-resize="right"></div>
+  <div class="copy-handle" data-handle>
+    <span class="copy-lbl">Copy</span>
+    <span class="copy-num">#${n}</span>
+  </div>
+  <div class="copy-body">
+    <textarea class="copy-ta" id="copy-ta-${id}" rows="4" placeholder="Texto do anúncio..."
+      oninput="cards['${id}']&&(cards['${id}'].data.copy=this.value);saveCurrentWf()">${data.copy||''}</textarea>
+  </div>
+  <div class="copy-dot" data-cid="${id}"></div>`;
+    }
+
+    /* ═══ FILE HANDLERS ═══ */
+    function handleLogo(e, id) {
+      const f = e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const url = ev.target.result;
+        const box = document.getElementById('id-logo-' + id);
+        if (box) box.innerHTML = `<img src="${url}" style="max-height:52px;max-width:100%;object-fit:contain;padding:4px">`;
+        if (cards[id]) cards[id].data.logoUrl = url;
+        saveCurrentWf();
+      };
+      reader.readAsDataURL(f);
+    }
+    function handleIdRef(e, id) {
+      const f = e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const url = ev.target.result;
+        const name = f.name.replace(/\.[^.]+$/, '').slice(0, 22);
+        const list = document.getElementById('id-refs-' + id);
+        if (list) {
+          const item = document.createElement('div');
+          item.className = 'id-ref-item';
+          item.innerHTML = `<img src="${url}" class="id-ref-img"><span class="id-ref-name">${name}</span><button class="id-ref-del" onclick="this.closest('.id-ref-item').remove()">×</button>`;
+          list.appendChild(item);
+        }
+        if (cards[id]) {
+          if (!cards[id].data.idRefs) cards[id].data.idRefs = [];
+          cards[id].data.idRefs.push({ url, name });
+        }
+        saveCurrentWf();
+      };
+      reader.readAsDataURL(f);
+    }
+    function handleRef(e, id) {
+      const f = e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => { setRefImage(id, ev.target.result); };
+      reader.readAsDataURL(f);
+    }
+    function setRefImage(id, url) {
+      const box = document.getElementById('ref-box-' + id);
+      if (box) box.innerHTML = url
+        ? `<img src="${url}">`
+        : `<span style="font-size:16px;color:var(--t4)">⊕</span><span style="font-size:9px;color:var(--t4)">Upload imagem</span>`;
+      const delBtn = document.getElementById('ref-del-' + id);
+      if (delBtn) delBtn.style.display = url ? 'flex' : 'none';
+      if (cards[id]) cards[id].data.refUrl = url;
+      saveCurrentWf();
+    }
+    function removeRefImg(id) {
+      if (!confirm('Remover imagem de referência?')) return;
+      setRefImage(id, '');
+    }
+    function fontsChipsHtml(id, fonts) {
+      return (fonts || []).map((f, i) => `<div class="id-chip" style="font-family:'${f}'">${f}<span class="id-chip-x" onclick="event.stopPropagation();delIdFont('${id}',${i})" title="Remover fonte">×</span></div>`).join('')
+        + `<div class="id-chip-add" onclick="addIdFont('${id}')">+ fonte</div>`;
+    }
+    function colorSwatchesHtml(id, colors) {
+      return (colors || []).map((c, i) => `<div class="id-swatch-wrap"><div class="id-swatch" style="background:${c}" title="${c}"></div><span class="id-swatch-x" onclick="event.stopPropagation();delIdColor('${id}',${i})" title="Remover cor">×</span></div>`).join('')
+        + `<div class="id-swatch-add" onclick="addIdColor('${id}')">+</div>`;
+    }
+    function rebuildIdentitySection(id, section) {
+      const data = cards[id]?.data; if (!data) return;
+      if (section === 'fonts') {
+        const cont = document.getElementById('id-fonts-' + id);
+        if (cont) cont.innerHTML = fontsChipsHtml(id, data.fonts || []);
+      } else if (section === 'colors') {
+        const cont = document.getElementById('id-colors-' + id);
+        if (cont) cont.innerHTML = colorSwatchesHtml(id, data.colors || []);
+      }
+    }
+    function delIdFont(id, idx) {
+      if (!cards[id]) return;
+      cards[id].data.fonts = cards[id].data.fonts || [];
+      cards[id].data.fonts.splice(idx, 1);
+      rebuildIdentitySection(id, 'fonts');
+      saveCurrentWf();
+    }
+    function delIdColor(id, idx) {
+      if (!cards[id]) return;
+      cards[id].data.colors = cards[id].data.colors || [];
+      cards[id].data.colors.splice(idx, 1);
+      rebuildIdentitySection(id, 'colors');
+      saveCurrentWf();
+    }
+    function addIdFont(id) {
+      const name = prompt('Nome da fonte:'); if (!name) return;
+      if (cards[id]) {
+        if (!cards[id].data.fonts) cards[id].data.fonts = ['Syne', 'DM Mono'];
+        cards[id].data.fonts.push(name);
+        rebuildIdentitySection(id, 'fonts');
+        saveCurrentWf();
+      }
+    }
+    function addIdColor(id) {
+      const inp = document.createElement('input'); inp.type = 'color'; inp.value = '#ffffff';
+      inp.style.cssText = 'position:fixed;top:-999px;left:-999px;opacity:0;pointer-events:none';
+      document.body.appendChild(inp);
+      inp.addEventListener('change', () => {
+        document.body.removeChild(inp);
+        if (cards[id]) {
+          if (!cards[id].data.colors) cards[id].data.colors = ['#e0e0e0', '#1a1a1a', '#666666'];
+          cards[id].data.colors.push(inp.value);
+          rebuildIdentitySection(id, 'colors');
+          saveCurrentWf();
+        }
+      });
+      inp.click();
+    }
+
+    /* ═══ TOGGLE IDENTITY SECTIONS ═══ */
+    function toggleIdSection(cardId, section, el) {
+      if (!cards[cardId]) return;
+      if (!cards[cardId].data.idToggles) cards[cardId].data.idToggles = {};
+      const isOn = el.classList.contains('on');
+      cards[cardId].data.idToggles[section] = !isOn;
+      el.classList.toggle('on', !isOn);
+      el.title = !isOn ? 'Enviando para IA' : 'Desativado';
+      const cont = document.getElementById('id-sc-' + section + '-' + cardId);
+      if (cont) cont.classList.toggle('id-sc-off', isOn);
+      saveCurrentWf();
+    }
+
+    /* ═══ PROMPT BUILDING ═══ */
+    function buildPrompt(id) {
+      const linked = conns.filter(c => c.to === id).map(c => cards[c.from]).filter(Boolean);
+      let idParts = [], copyText = '', hasRef = false, styleParts = [];
+      linked.forEach(src => {
+        if (src.type === 'identity') {
+          const tog = src.data.idToggles || {};
+          const on = k => tog[k] !== false;
+
+          if (on('prompt')) {
+            const pt = src.data.promptBase || 'Seguir exatamente a paleta de cores e estilo visual da marca. Usar a logo fornecida. Manter coerência visual com as referências de estilo.';
+            idParts.push(pt);
+          }
+          if (on('fonts') && src.data.fonts?.length)
+            idParts.push(`Fontes da marca: ${src.data.fonts.join(', ')}.`);
+          if (on('colors') && src.data.colors?.length)
+            idParts.push(`Paleta de cores (hex): ${src.data.colors.join(', ')}.`);
+          if (on('logo') && src.data.logoUrl)
+            idParts.push('Incorporar a logo da marca ao criativo (enviada como imagem de referência).');
+          if (on('refs') && src.data.idRefs?.length)
+            idParts.push(`Referências visuais da identidade (enviadas como imagem): ${src.data.idRefs.map(r => r.name).join(', ')}.`);
+        }
+        if (src.type === 'copy' && src.data?.copy) copyText = src.data.copy;
+        if (src.type === 'ref') {
+          hasRef = true;
+          if (src.data?.style) {
+            const st = styleItems.find(s => s.name === src.data.style);
+            if (st?.prompt) styleParts.push(st.prompt);
+          }
+        }
+      });
+      const idText = idParts.join('\n');
+      const styleText = styleParts.join('\n');
+      const fmt = document.getElementById('cr-f-' + id)?.value || '1024x1024';
+      let p = `Crie uma imagem publicitária de alta qualidade, formato ${fmt}.\n\n`;
+      if (idText) p += `IDENTIDADE:\n${idText}\n\n`;
+      if (copyText) p += `TEXTO DO ANÚNCIO: "${copyText}"\n\n`;
+      if (hasRef) p += `Use o estilo visual da imagem de referência como inspiração.\n\n`;
+      if (styleText) p += `ESTILO VISUAL:\n${styleText}\n\n`;
+      if (!idText && !copyText && !hasRef) p += `Seja criativo. Resultado profissional e impactante para marketing digital.\n\n`;
+      const alterTa = document.querySelector(`#alter-${id} .alter-ta`);
+      if (alterTa?.value) p += `AJUSTES: ${alterTa.value}\n\n`;
+      p += `Fotorrealista, profissional, alta qualidade, adequado para redes sociais.`;
+      return p;
+    }
+
+    /* ═══ GENERATION ═══ */
+    async function genCard(id, isRegen) {
+      const key = getActiveApiKey();
+      if (!key) { alert('Configure sua API Key em Configurações.'); return }
+
+      const model = document.getElementById('def-model')?.value || 'dall-e-3';
+      const prev = document.getElementById('cr-prev-' + id);
+      const genBtn = document.getElementById('cr-gen-' + id);
+      const prompt = buildPrompt(id);
+      const fmtRaw = document.getElementById('cr-f-' + id)?.value || '1024x1024';
+
+      // gpt-image-1/2 use different size values than dall-e-3
+      const sizeRemap = {
+        'gpt-image-1': { '1024x1792': '1024x1536', '1792x1024': '1536x1024' },
+        'gpt-image-2': { '1024x1792': '1024x1536', '1792x1024': '1536x1024' }
+      };
+      const fmt = sizeRemap[model]?.[fmtRaw] || fmtRaw;
+
+      const qual = document.getElementById('cr-ql-' + id)?.value || 'standard';
+      const isGptModel = model === 'gpt-image-1' || model === 'gpt-image-2';
+      const apiQuality = isGptModel
+        ? ({ standard: 'medium', hd: 'high', low: 'low', medium: 'medium', high: 'high' }[qual] || 'medium')
+        : qual;
+
+      const controller = new AbortController();
+      abortControllers[id] = controller;
+
+      if (prev) prev.innerHTML = `<div class="cr-empty-wrap"><div class="cr-empty-icon"><span class="spin" style="font-size:20px">↻</span></div><div class="cr-empty-txt">Gerando...</div></div>`;
+      startGenTimer(id);
+      if (genBtn) {
+        genBtn.classList.remove('busy');
+        genBtn.classList.add('stop');
+        genBtn.innerHTML = '■ PARAR';
+        genBtn.onclick = () => controller.abort();
+      }
+
+      const logId = 'log_' + uid();
+      logEntries.unshift({ id: logId, status: 'gen', text: `${id} — ${fmtRaw}`, time: new Date().toLocaleTimeString('pt-BR') });
+      renderLog();
+
+      const resetBtn = () => {
+        if (genBtn) {
+          genBtn.classList.remove('stop', 'busy');
+          genBtn.innerHTML = '⚡ GERAR';
+          genBtn.onclick = () => genCard(id);
+        }
+        delete abortControllers[id];
+      };
+
+      try {
+        let imgSrc = null;
+
+        const linked = conns.filter(c => c.to === id).map(c => cards[c.from]).filter(Boolean);
+
+        // Collect all reference images (identity logo, identity refs, ref cards)
+        const refImages = [];
+        if (isGptModel) {
+          const identitySrc = linked.find(src => src.type === 'identity');
+          if (identitySrc) {
+            const tog = identitySrc.data.idToggles || {};
+            const on = k => tog[k] !== false;
+            if (on('logo') && identitySrc.data?.logoUrl)
+              refImages.push({ url: identitySrc.data.logoUrl, name: 'logo.png' });
+            if (on('refs'))
+              (identitySrc.data?.idRefs || []).forEach((r, i) =>
+                refImages.push({ url: r.url, name: r.name || `ref${i}.png` })
+              );
+          }
+          linked.filter(src => src.type === 'ref' && src.data?.refUrl)
+            .forEach((rc, i) => refImages.push({ url: rc.data.refUrl, name: `reference${i}.png` }));
+        }
+
+        function dataUrlToBlob(dataUrl) {
+          const b64 = dataUrl.split(',')[1];
+          const mime = dataUrl.split(';')[0].split(':')[1] || 'image/png';
+          const bytes = atob(b64);
+          const arr = new Uint8Array(bytes.length);
+          for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+          return new Blob([arr], { type: mime });
+        }
+
+        if (isGptModel && refImages.length > 0) {
+          const fd = new FormData();
+          const imgKey = refImages.length > 1 ? 'image[]' : 'image';
+          refImages.forEach(img => fd.append(imgKey, dataUrlToBlob(img.url), img.name));
+          fd.append('prompt', prompt);
+          fd.append('model', model);
+          fd.append('n', '1');
+          fd.append('size', fmt);
+          fd.append('quality', apiQuality);
+
+          const res = await fetch('https://api.openai.com/v1/images/edits', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + key },
+            body: fd,
+            signal: controller.signal
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error.message);
+          imgSrc = data.data[0].b64_json
+            ? 'data:image/png;base64,' + data.data[0].b64_json
+            : data.data[0].url;
+        } else {
+          const body = { model, prompt, n: 1, size: fmt, quality: apiQuality };
+          if (!isGptModel) body.response_format = 'b64_json';
+          const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+            body: JSON.stringify(body),
+            signal: controller.signal
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error.message);
+          imgSrc = data.data[0].b64_json
+            ? 'data:image/png;base64,' + data.data[0].b64_json
+            : data.data[0].url;
+        }
+
+        genImgs[id] = { url: imgSrc, prompt, ts: Date.now() };
+        if (prev) prev.innerHTML = `<img src="${imgSrc}">`;
+        stopGenTimer(id, true);
+        resetBtn();
+        document.getElementById('cr-post-' + id)?.classList.add('show');
+        const le = logEntries.find(l => l.id === logId); if (le) { le.status = 'done'; le.text += ' ✓' }
+        renderLog();
+        addToGallery(id, imgSrc);
+        saveCurrentWf();
+      } catch (err) {
+        stopGenTimer(id);
+        if (err.name === 'AbortError') {
+          if (prev) prev.innerHTML = `<div class="cr-empty-wrap"><div class="cr-empty-icon" style="color:var(--t4)">■</div><div class="cr-empty-txt">Geração cancelada</div></div>`;
+          const le = logEntries.find(l => l.id === logId); if (le) { le.status = 'err'; le.text += ' cancelado' }
+        } else {
+          if (prev) prev.innerHTML = `<div class="cr-empty-wrap"><span style="font-size:16px">⚠</span><span style="color:#8a5a5a;font-size:9px">${err.message.slice(0, 55)}</span></div>`;
+          const le = logEntries.find(l => l.id === logId); if (le) { le.status = 'err'; le.text += ' ✗' }
+        }
+        resetBtn();
+        renderLog();
+      }
+    }
+
+    async function genAll() {
+      genAllAbort = false;
+      const btn = document.getElementById('gen-all-btn');
+      if (btn) { btn.innerHTML = '■ Parar tudo'; btn.classList.add('hi'); btn.style.background = '#2a1a1a'; btn.style.borderColor = '#4a2a2a'; btn.style.color = '#c08080'; btn.onclick = stopAll; }
+      const results = Object.keys(cards).filter(id => cards[id]?.type === 'result');
+      for (const id of results) {
+        if (genAllAbort) break;
+        await genCard(id);
+        if (!genAllAbort) await new Promise(r => setTimeout(r, 1200));
+      }
+      resetGenAllBtn();
+    }
+
+    function stopAll() {
+      genAllAbort = true;
+      Object.values(abortControllers).forEach(c => c.abort());
+      resetGenAllBtn();
+    }
+
+    function resetGenAllBtn() {
+      genAllAbort = false;
+      const btn = document.getElementById('gen-all-btn');
+      if (btn) { btn.innerHTML = '⚡ Gerar todos'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.onclick = genAll; }
+    }
+
+    async function dlUrl(url, filename) {
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const localUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = localUrl; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(localUrl), 5000);
+      } catch (e) {
+        // Fallback para abrir a url (se CORS impedir fetch)
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        a.target = '_blank';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      }
+    }
+    function dlCard(id) {
+      const d = genImgs[id]; if (!d?.url) { alert('Nenhuma imagem gerada ainda.'); return }
+      dlUrl(d.url, `criativo_${id}_${Date.now()}.png`);
+    }
+    function dlGalleryItem(gid) {
+      const it = galleryItems.find(g => g.gid === gid); if (!it) return;
+      dlUrl(it.url, `criativo_${it.cardId}_${it.ts}.png`);
+    }
+    function dlAll() { galleryItems.forEach((it, i) => setTimeout(() => dlGalleryItem(it.gid), i * 600)) }
+    function toggleAlter(id) { document.getElementById('alter-' + id)?.classList.toggle('open') }
+
+    /* ═══ SAVE / LOAD PROJECT ═══ */
+    function saveProject() {
+      saveCurrentWf();
+      const state = { version: 2, workflows, currentWf, libItems };
+      const json = JSON.stringify(state);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cria-ativos-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }
+
+    function loadProject() {
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = '.json';
+      input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const state = JSON.parse(ev.target.result);
+            if (!state.workflows) throw new Error('Arquivo inválido.');
+            workflows = state.workflows;
+            libItems = state.libItems || [];
+            currentWf = state.currentWf || workflows[0].id;
+            loadWf(currentWf);
+            document.getElementById('wf-name').textContent = workflows.find(w => w.id === currentWf)?.name || '';
+            renderWfList();
+            renderLib();
+            saveCurrentWf();
+          } catch(err) {
+            alert('Erro ao carregar: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    /* ═══ LOG ═══ */
+    function renderLog() {
+      const cont = document.getElementById('log-entries'); if (!cont) return;
+      if (!logEntries.length) {
+        cont.innerHTML = '<div class="log-empty"><span style="font-size:24px;color:var(--t4)">◈</span><span>Nenhuma geração ainda</span></div>';
+        return;
+      }
+      const sc = { waiting: 'ls-wait', gen: 'ls-gen', done: 'ls-done', err: 'ls-err' };
+      cont.innerHTML = logEntries.map(l => `
+    <div class="log-entry">
+      <div class="log-dot ${sc[l.status] || 'ls-wait'}"></div>
+      <div class="log-text">${l.text}</div>
+      <div class="log-time">${l.time}</div>
+    </div>`).join('');
+    }
+
+    /* ═══ GALLERY ═══ */
+    function addToGallery(cardId, url) {
+      const gid = 'g_' + uid();
+      galleryItems.unshift({ gid, cardId, url, date: new Date().toLocaleDateString('pt-BR'), ts: Date.now() });
+      if (galleryItems.length > 80) galleryItems.length = 80; // limita tamanho salvo localmente
+      renderGallery();
+    }
+    function renderGallery() {
+      const grid = document.getElementById('gv-grid'); if (!grid) return;
+      if (!galleryItems.length) {
+        grid.innerHTML = '<div class="log-empty"><span style="font-size:24px;color:var(--t4)">◈</span><span>Nenhum criativo gerado ainda</span></div>';
+        return;
+      }
+      grid.innerHTML = galleryItems.map(it => `<div class="gv-card" data-gid="${it.gid}"><img class="gv-img" src="${it.url}"><div class="gv-info"><div class="gv-name">Criativo ${it.cardId}</div><div class="gv-date">${it.date}</div><button class="gv-dl" onclick="dlGalleryItem('${it.gid}')">⬇ Baixar</button></div></div>`).join('');
+    }
+
+    /* ═══ LIBRARY ═══ */
+    function renderLib() {
+      const grid = document.getElementById('lib-grid'); if (!grid) return;
+      grid.innerHTML = '';
+      libItems.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'lib-card';
+        card.draggable = true;
+        card.innerHTML = `
+      <button class="lib-del" onclick="event.stopPropagation();delLibItem(${i})">×</button>
+      <label style="cursor:pointer;display:block" class="lib-card-img-area">
+        ${item.img ? `<img src="${item.img}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<div class="lib-card-img-empty">⊕</div>`}
+        <input type="file" accept="image/*" style="display:none" onchange="libUpload(event,${i})">
+      </label>
+      <div class="lib-card-body">
+        <textarea class="lib-card-ta" placeholder="Anotação..." rows="2"
+          oninput="libItems[${i}].text=this.value">${item.text || ''}</textarea>
+      </div>`;
+        card.addEventListener('dragstart', () => { libDragIdx = i; card.classList.add('dragging') });
+        card.addEventListener('dragend', () => { card.classList.remove('dragging'); libDragIdx = null });
+        card.addEventListener('dragover', e => e.preventDefault());
+        card.addEventListener('drop', e => {
+          e.preventDefault();
+          if (libDragIdx === null || libDragIdx === i) return;
+          const moved = libItems.splice(libDragIdx, 1)[0];
+          libItems.splice(i, 0, moved);
+          renderLib();
+        });
+        grid.appendChild(card);
+      });
+      const addBtn = document.createElement('div');
+      addBtn.className = 'lib-add-card'; addBtn.textContent = '+';
+      addBtn.onclick = () => { libItems.push({ img: '', text: '' }); renderLib() };
+      grid.appendChild(addBtn);
+    }
+    function libUpload(e, idx) {
+      const f = e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        libItems[idx].img = ev.target.result; renderLib();
+        saveCurrentWf();
+      };
+      reader.readAsDataURL(f);
+    }
+    function delLibItem(idx) { if (confirm('Remover?')) { libItems.splice(idx, 1); renderLib(); saveCurrentWf() } }
+
+    /* ═══ BIBLIOTECA: ABA ESTILOS ═══ */
+    function renderStyleLib() {
+      const grid = document.getElementById('style-grid'); if (!grid) return;
+      grid.innerHTML = '';
+      styleItems.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'style-card';
+        card.innerHTML = `
+      <button class="lib-del" onclick="event.stopPropagation();delStyleItem(${i})">×</button>
+      <label class="style-card-img-area">
+        ${item.img ? `<img src="${item.img}">` : `<div class="style-card-img-empty">⊕</div>`}
+        <input type="file" accept="image/*" style="display:none" onchange="styleImgUpload(event,${i})">
+      </label>
+      <div class="style-card-body">
+        <input class="style-name-input" value="${(item.name || '').replace(/"/g, '&quot;')}" placeholder="Nome do estilo"
+          oninput="styleItems[${i}].name=this.value;saveCurrentWf()">
+        <textarea class="style-prompt-ta" rows="3" placeholder="Prompt do estilo (será adicionado à geração)..."
+          oninput="styleItems[${i}].prompt=this.value;saveCurrentWf()">${item.prompt || ''}</textarea>
+      </div>`;
+        grid.appendChild(card);
+      });
+      const addBtn = document.createElement('div');
+      addBtn.className = 'lib-add-card'; addBtn.textContent = '+';
+      addBtn.onclick = () => { styleItems.push({ name: 'Novo estilo', img: '', prompt: '' }); renderStyleLib(); saveCurrentWf() };
+      grid.appendChild(addBtn);
+    }
+    function styleImgUpload(e, idx) {
+      const f = e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => { styleItems[idx].img = ev.target.result; renderStyleLib(); saveCurrentWf() };
+      reader.readAsDataURL(f);
+    }
+    function delStyleItem(idx) { if (confirm('Remover este estilo?')) { styleItems.splice(idx, 1); renderStyleLib(); saveCurrentWf() } }
+
+    /* ═══ BIBLIOTECA DE REFERÊNCIAS (modal do card) ═══ */
+    function openRefLibModal(cardId) {
+      refLibTarget = cardId;
+      refLibTab = 'refs';
+      document.querySelectorAll('#ref-lib-modal .lib-tab').forEach(b => b.classList.toggle('on', b.dataset.mtab === 'refs'));
+      renderRefLibModal();
+      document.getElementById('ref-lib-modal').classList.add('open');
+    }
+    function closeRefLibModal() {
+      document.getElementById('ref-lib-modal').classList.remove('open');
+      refLibTarget = null;
+    }
+    function switchLibModalTab(tab, btn) {
+      refLibTab = tab;
+      document.querySelectorAll('#ref-lib-modal .lib-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderRefLibModal();
+    }
+    function renderRefLibModal() {
+      const body = document.getElementById('ref-lib-modal-body'); if (!body) return;
+      if (refLibTab === 'styles') {
+        if (!styleItems.length) { body.innerHTML = '<div class="ref-lib-card-empty">Nenhum estilo cadastrado na Biblioteca</div>'; return; }
+        body.innerHTML = styleItems.map((s, i) => `
+          <div class="ref-lib-card" onclick="pickStyleFromLib(${i})">
+            ${s.img ? `<img src="${s.img}">` : `<div class="style-card-img-empty">⊕</div>`}
+            <div class="ref-lib-use">${(s.name || 'Estilo').replace(/</g, '&lt;')}</div>
+          </div>`).join('');
+      } else {
+        if (!libItems.length) { body.innerHTML = '<div class="ref-lib-card-empty">Nenhuma referência cadastrada na Biblioteca</div>'; return; }
+        body.innerHTML = libItems.map((it, i) => `
+          <div class="ref-lib-card" onclick="pickRefFromLib(${i})">
+            <img src="${it.img || it.url || ''}">
+            <div class="ref-lib-use">Usar esta imagem</div>
+          </div>`).join('');
+      }
+    }
+    function pickRefFromLib(idx) {
+      const it = libItems[idx]; if (!it || !refLibTarget) return;
+      setRefImage(refLibTarget, it.img || it.url || '');
+      closeRefLibModal();
+    }
+    function pickStyleFromLib(idx) {
+      const s = styleItems[idx]; if (!s || !refLibTarget) return;
+      if (cards[refLibTarget]) cards[refLibTarget].data.style = s.name;
+      const sel = document.querySelector(`#card-${refLibTarget} .ref-style-sel`);
+      if (sel) sel.value = s.name;
+      saveCurrentWf();
+      closeRefLibModal();
+    }
+
+    /* ═══ WORKFLOWS ═══ */
+    function renderWfList() {
+      const list = document.getElementById('wf-list'); if (!list) return;
+      list.innerHTML = workflows.map(wf => `
+    <div class="wf-item ${wf.id === currentWf ? 'cur' : ''}" onclick="switchWf('${wf.id}')">
+      <span>⊞</span><span style="flex:1">${wf.name}</span>
+      <div class="wf-acts">
+        <button class="wa" onclick="event.stopPropagation();renameWf('${wf.id}')">✎</button>
+        <button class="wa" onclick="event.stopPropagation();dupWf('${wf.id}')">⊕</button>
+        <button class="wa" onclick="event.stopPropagation();delWf('${wf.id}')">×</button>
+      </div>
+    </div>`).join('');
+    }
+    function toggleWfDrop() {
+      const d = document.getElementById('wf-drop'); d.classList.toggle('open'); renderWfList();
+    }
+    /* ═══ CLOUD SYNC ═══ */
+    let _syncTimer = null;
+    function setSyncStatus(state) {
+      const icon = document.getElementById('sync-icon');
+      const label = document.getElementById('sync-label');
+      if (!icon) return;
+      if (state === 'saving')  { icon.style.color = '#a0a060'; label.textContent = 'salvando…'; }
+      else if (state === 'ok') { icon.style.color = '#60a060'; label.textContent = 'cloud'; }
+      else if (state === 'err'){ icon.style.color = '#c06060'; label.textContent = 'sem cloud'; }
+      else                     { icon.style.color = 'var(--t4)'; label.textContent = 'cloud'; }
+    }
+    function cloudPush() {
+      clearTimeout(_syncTimer);
+      _syncTimer = setTimeout(async () => {
+        setSyncStatus('saving');
+        try {
+          const payload = JSON.stringify({
+            workflows, currentWf, libItems, styleItems,
+            galleryItems, logEntries: logEntries.slice(0, 80),
+            // apiAccounts NUNCA é enviado — contém chaves de API e o blob é público
+            ts: Date.now()
+          });
+          const r = await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+          });
+          setSyncStatus(r.ok ? 'ok' : 'err');
+        } catch (e) {
+          setSyncStatus('err');
+        }
+      }, 1500);
+    }
+    async function cloudLoad() {
+      try {
+        const r = await fetch('/api/sync');
+        if (!r.ok) return null;
+        const data = await r.json();
+        if (!data || !data.workflows) return null;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveCurrentWf() {
+      const wf = workflows.find(w => w.id === currentWf);
+      if (wf) {
+        wf.pan = { x: panX, y: panY }; wf.scale = scale;
+        // save minimal card data
+        wf.cards = {};
+        Object.entries(cards).forEach(([id, c]) => {
+          wf.cards[id] = { type: c.type, x: c.x, y: c.y, data: c.data || {} };
+        });
+        wf.conns = conns.slice();
+      }
+      try {
+        localStorage.setItem('CA_workflows', JSON.stringify(workflows));
+        localStorage.setItem('CA_current_wf', currentWf);
+        localStorage.setItem('CA_libItems', JSON.stringify(libItems));
+        localStorage.setItem('CA_styleItems', JSON.stringify(styleItems));
+        localStorage.setItem('CA_ts', String(Date.now()));
+        // genImgs (base64) kept in memory only — too large for localStorage
+      } catch (e) {
+        console.warn('Falha ao salvar estado:', e);
+      }
+      try {
+        localStorage.setItem('CA_gallery', JSON.stringify(galleryItems));
+        localStorage.setItem('CA_log', JSON.stringify(logEntries.slice(0, 80)));
+      } catch (e) {
+        console.warn('Falha ao salvar galeria/log (limite de armazenamento):', e);
+      }
+      cloudPush();
+    }
+    function loadWf(id) {
+      canvas.innerHTML = ''; svgBack.innerHTML = ''; cards = {}; conns = [];
+      const wf = workflows.find(w => w.id === id); if (!wf) return;
+      panX = wf.pan?.x || 0; panY = wf.pan?.y || 0; scale = wf.scale || 1; applyTransform();
+      if (wf.cards) {
+        // identity first
+        Object.entries(wf.cards).filter(([, c]) => c.type === 'identity')
+          .forEach(([cid, c]) => spawnCard('identity', c.x, c.y, cid, c.data));
+        Object.entries(wf.cards).filter(([, c]) => c.type !== 'identity')
+          .forEach(([cid, c]) => spawnCard(c.type, c.x, c.y, cid, c.data));
+      }
+      conns = (wf.conns || []).map(c => ({ ...c }));
+      // Garante que novos cards/conexões criados nesta sessão não reaproveitem
+      // IDs já usados pelo workflow carregado (evita sobrescrever cards/conexões)
+      bumpUid([...Object.keys(wf.cards || {}), ...conns.map(c => c.id)]);
+      setTimeout(() => { drawLines(); refreshResultCards(); }, 80);
+    }
+    function switchWf(id) {
+      saveCurrentWf(); currentWf = id; loadWf(id);
+      document.getElementById('wf-name').textContent = workflows.find(w => w.id === id)?.name || '';
+      document.getElementById('wf-drop').classList.remove('open');
+    }
+    function newWorkflow() {
+      const name = prompt('Nome do workflow:', 'Workflow ' + (workflows.length + 1)); if (!name) return;
+      const id = 'wf_' + uid();
+      workflows.push({ id, name, cards: {}, conns: [], pan: { x: 0, y: 0 }, scale: 1 });
+      switchWf(id);
+      seedDefaultLayout();
+      saveCurrentWf();
+      document.getElementById('wf-drop').classList.remove('open');
+    }
+    function renameWf(id) {
+      const wf = workflows.find(w => w.id === id); if (!wf) return;
+      const n = prompt('Novo nome:', wf.name);
+      if (n) { wf.name = n; if (id === currentWf) document.getElementById('wf-name').textContent = n }
+      renderWfList();
+    }
+    function dupWf(id) {
+      const wf = workflows.find(w => w.id === id); if (!wf) return;
+      const nid = 'wf_' + uid();
+      workflows.push({ ...JSON.parse(JSON.stringify(wf)), id: nid, name: wf.name + ' (cópia)' });
+      renderWfList();
+    }
+    function delWf(id) {
+      if (workflows.length === 1) { alert('Último workflow, não pode remover.'); return }
+      if (!confirm('Remover este workflow?')) return;
+      workflows = workflows.filter(w => w.id !== id);
+      if (currentWf === id) switchWf(workflows[0].id);
+      else renderWfList();
+    }
+
+    /* ═══ NAV ═══ */
+    function nav(viewName, btn) {
+      document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.sb-hdr').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      if (btn) {
+        btn.classList.add('active');
+        const hdr = btn.closest('.sb-group')?.querySelector('.sb-hdr');
+        if (hdr) hdr.classList.add('active');
+      }
+      document.getElementById(viewName + '-view').classList.add('active');
+      if (viewName === 'log') renderLog();
+      if (viewName === 'gallery') renderGallery();
+      if (viewName === 'library') { renderStyleLib(); renderLib(); }
+    }
+
+    /* ═══ CATEGORY TABS (Imagem / Vídeo / Post / Configurações) ═══ */
+    const CAT_INFO = {
+      video: { color: '#e0617a', label: 'Vídeo', svg: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 9.5l5-3v11l-5-3z"/></svg>' },
+      post:  { color: '#54c08a', label: 'Post',  svg: '<svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>' }
+    };
+    function showPlaceholder(cat) {
+      document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('placeholder-view').classList.add('active');
+      const info = CAT_INFO[cat]; if (!info) return;
+      const icon = document.getElementById('ph-icon');
+      icon.innerHTML = info.svg;
+      icon.style.color = info.color;
+      icon.style.borderColor = info.color;
+      const title = document.getElementById('ph-title');
+      title.textContent = info.label;
+      title.style.color = info.color;
+    }
+    function switchCat(cat, btn) {
+      document.querySelectorAll('.sb-hdr').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (cat === 'imagem') {
+        const items = btn.closest('.sb-group').querySelector('.sb-items');
+        nav('board', items.querySelector('.sb-item'));
+      } else if (cat === 'config') {
+        document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('settings-view').classList.add('active');
+      } else {
+        showPlaceholder(cat);
+      }
+    }
+    function closeAdd() { document.getElementById('add-menu').classList.remove('open') }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#add-wrap')) closeAdd();
+      if (!e.target.closest('#wf-drop') && !e.target.closest('#wf-btn'))
+        document.getElementById('wf-drop').classList.remove('open');
+      if (!e.target.closest('#api-status-wrap'))
+        document.getElementById('api-status-drop')?.classList.remove('open');
+    });
+
+    /* ═══ GALLERY FILTER ═══ */
+    function filterGallery(filter, btn) {
+      document.querySelectorAll('.gf').forEach(b => b.classList.remove('on'));
+      if (btn) btn.classList.add('on');
+      const grid = document.getElementById('gv-grid'); if (!grid) return;
+      const today = new Date().toLocaleDateString('pt-BR');
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      grid.querySelectorAll('.gv-card').forEach(card => {
+        if (filter === 'all') { card.style.display = ''; return; }
+        const dateText = card.querySelector('.gv-date')?.textContent || '';
+        if (filter === 'today') {
+          card.style.display = dateText === today ? '' : 'none';
+        } else {
+          const parts = dateText.split('/');
+          if (parts.length < 3) { card.style.display = 'none'; return; }
+          const cardDate = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+          card.style.display = cardDate >= weekAgo ? '' : 'none';
+        }
+      });
+    }
+
+    /* ═══ SETTINGS ═══ */
+    function saveKey() {
+      const k = document.getElementById('oai-key').value;
+      localStorage.setItem('cs_openai_key', k);
+      const stat = document.getElementById('api-stat');
+      if (stat) { stat.textContent = '● Configurada'; stat.className = 'sv-stat ok' }
+    }
+    const sk = localStorage.getItem('cs_openai_key');
+    if (sk && document.getElementById('oai-key')) {
+      document.getElementById('oai-key').value = sk;
+      const stat = document.getElementById('api-stat');
+      if (stat) { stat.textContent = '● Configurada'; stat.className = 'sv-stat ok' }
+    }
+
+    /* ═══ CONTAS DE API (múltiplas chaves) ═══ */
+    function saveApiAccounts() {
+      try { localStorage.setItem('CA_apiAccounts', JSON.stringify(apiAccounts)); } catch (e) {}
+      try { localStorage.setItem('CA_activeApiId', activeApiId || ''); } catch (e) {}
+    }
+    function loadApiAccounts() {
+      try { apiAccounts = JSON.parse(localStorage.getItem('CA_apiAccounts') || '[]'); } catch (e) { apiAccounts = []; }
+      activeApiId = localStorage.getItem('CA_activeApiId') || null;
+      if (!activeApiId && apiAccounts.length) activeApiId = apiAccounts[0].id;
+    }
+    function renderApiAccounts() {
+      const wrap = document.getElementById('api-accounts-list'); if (!wrap) return;
+      if (!apiAccounts.length) { wrap.innerHTML = '<div style="font-size:10px;color:var(--t4);padding:6px 0">Nenhuma conta cadastrada ainda.</div>'; return; }
+      wrap.innerHTML = apiAccounts.map(acc => `
+        <div class="api-key-row">
+          <input class="api-key-name" value="${(acc.name || '').replace(/"/g, '&quot;')}" placeholder="Nome da conta"
+            oninput="renameApiAccount('${acc.id}',this.value)">
+          <input class="api-key-input" type="password" value="${(acc.key || '').replace(/"/g, '&quot;')}" placeholder="sk-..."
+            oninput="setApiAccountKey('${acc.id}',this.value)">
+          <span class="api-led led-${acc.status || 'yellow'}" title="${acc.status === 'green' ? 'Funcionando' : acc.status === 'red' ? 'Não ativada' : 'Não testada'}"></span>
+          <button class="sv-save" style="margin:0;padding:6px 10px;font-size:10px" onclick="testApiAccount('${acc.id}')">Testar</button>
+          <button class="api-key-del" onclick="delApiAccount('${acc.id}')" title="Remover">×</button>
+        </div>`).join('');
+    }
+    function addApiAccount() {
+      const acc = { id: 'api_' + uid(), name: `Conta ${apiAccounts.length + 1}`, key: '', status: 'yellow' };
+      apiAccounts.push(acc);
+      if (!activeApiId) activeApiId = acc.id;
+      saveApiAccounts(); renderApiAccounts(); refreshGenApiSelect(); refreshApiStatusWidget();
+    }
+    function renameApiAccount(id, name) {
+      const acc = apiAccounts.find(a => a.id === id); if (!acc) return;
+      acc.name = name; saveApiAccounts(); refreshGenApiSelect(); refreshApiStatusWidget();
+    }
+    function setApiAccountKey(id, key) {
+      const acc = apiAccounts.find(a => a.id === id); if (!acc) return;
+      acc.key = key; acc.status = key ? 'yellow' : 'red';
+      saveApiAccounts(); renderApiAccounts(); refreshApiStatusWidget();
+    }
+    function delApiAccount(id) {
+      if (!confirm('Remover esta conta de API?')) return;
+      apiAccounts = apiAccounts.filter(a => a.id !== id);
+      if (activeApiId === id) activeApiId = apiAccounts[0]?.id || null;
+      saveApiAccounts(); renderApiAccounts(); refreshGenApiSelect(); refreshApiStatusWidget();
+    }
+    async function testApiAccount(id) {
+      const acc = apiAccounts.find(a => a.id === id); if (!acc) return;
+      if (!acc.key) { acc.status = 'red'; saveApiAccounts(); renderApiAccounts(); refreshApiStatusWidget(); return; }
+      acc.status = 'yellow'; renderApiAccounts();
+      try {
+        const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': 'Bearer ' + acc.key } });
+        acc.status = res.ok ? 'green' : 'red';
+      } catch (e) { acc.status = 'red'; }
+      saveApiAccounts(); renderApiAccounts(); refreshApiStatusWidget();
+    }
+    function refreshGenApiSelect() {
+      const sel = document.getElementById('gen-api-sel'); if (!sel) return;
+      if (!apiAccounts.length) { sel.style.display = 'none'; sel.innerHTML = ''; return; }
+      sel.style.display = '';
+      sel.innerHTML = apiAccounts.map(a => `<option value="${a.id}"${a.id === activeApiId ? ' selected' : ''}>${(a.name || 'Conta').replace(/</g, '&lt;')}</option>`).join('');
+    }
+    function setActiveApiKey(id) {
+      activeApiId = id; saveApiAccounts(); refreshApiStatusWidget();
+    }
+    function getActiveApiKey() {
+      const acc = apiAccounts.find(a => a.id === activeApiId);
+      if (acc?.key) return acc.key;
+      return localStorage.getItem('cs_openai_key') || document.getElementById('oai-key')?.value || '';
+    }
+    function refreshApiStatusWidget() {
+      const dot = document.getElementById('api-status-dot');
+      const list = document.getElementById('api-status-list');
+      const acc = apiAccounts.find(a => a.id === activeApiId);
+      let status = 'yellow';
+      if (acc) status = acc.status || 'yellow';
+      else if (localStorage.getItem('cs_openai_key')) status = 'yellow';
+      else status = 'red';
+      if (dot) dot.className = 'api-led led-' + status;
+      if (list) {
+        if (!apiAccounts.length) {
+          list.innerHTML = '<div class="asd-row"><span class="asd-name">Chave única (Configurações)</span><span class="asd-state">' + (localStorage.getItem('cs_openai_key') ? '🟡 configurada' : '🔴 não configurada') + '</span></div>';
+        } else {
+          list.innerHTML = apiAccounts.map(a => `<div class="asd-row"><span class="asd-name">${(a.name || 'Conta').replace(/</g, '&lt;')}${a.id === activeApiId ? ' (ativa)' : ''}</span><span class="asd-state">${a.status === 'green' ? '🟢 funcionando' : a.status === 'red' ? '🔴 não ativada' : '🟡 não testada'}</span></div>`).join('');
+        }
+      }
+    }
+    function toggleApiStatusDrop() {
+      document.getElementById('api-status-drop')?.classList.toggle('open');
+    }
+
+    /* ═══ INIT ═══ */
+    function seedDefaultLayout() {
+      scale = 0.72; panX = 60; panY = 60;
+      applyTransform();
+
+      // Identity card on the left
+      const iid = spawnCard('identity', 10, 0);
+
+      // 10 result cards: 2 rows of 5, starting at x=260
+      const resultIds = [];
+      const colGap = 260, rowGap = 370;
+      for (let i = 0; i < 10; i++) {
+        const col = i % 5, row = Math.floor(i / 5);
+        const rid = spawnCard('result', 260 + col * colGap, row * rowGap + 30);
+        resultIds.push(rid);
+      }
+
+      // 5 ref cards: above row 1 results
+      for (let i = 0; i < 5; i++) {
+        const rfid = spawnCard('ref', 260 + i * colGap, -160);
+        addConn(rfid, resultIds[i]);
+      }
+
+      // 5 copy cards: below row 2 results
+      for (let i = 0; i < 5; i++) {
+        const cpid = spawnCard('copy', 260 + i * colGap, rowGap * 2 + 50);
+        const numEl = document.querySelector(`#${cpid} .copy-num`);
+        if (numEl) numEl.textContent = '#' + (i + 1);
+        addConn(cpid, resultIds[i]);
+      }
+
+      // Connect identity to all results
+      resultIds.forEach(rid => addConn(iid, rid));
+      drawLines();
+    }
+    function seedDefaultStyles() {
+      styleItems = [
+        { name: 'Realista', img: '', prompt: 'Estilo fotográfico realista: iluminação natural, alta definição, texturas e profundidade reais, como uma fotografia profissional de produto/marketing.' },
+        { name: 'Cartunesco', img: '', prompt: 'Estilo cartunesco/ilustrado: cores vibrantes, contornos definidos, traços estilizados e expressivos, visual lúdico e divertido.' },
+        { name: 'Emocional', img: '', prompt: 'Estilo emocional e sensorial: tons quentes e suaves, composição que transmite sentimento e conexão humana, foco em expressões e atmosfera.' },
+      ];
+    }
+    function applyState(data) {
+      if (data.workflows) workflows = data.workflows;
+      if (data.libItems) libItems = data.libItems;
+      if (data.styleItems) styleItems = data.styleItems;
+      if (data.galleryItems) galleryItems = data.galleryItems;
+      if (data.logEntries) logEntries = data.logEntries;
+      const cwf = data.currentWf || workflows[0]?.id || 'wf1';
+      currentWf = cwf;
+      loadWf(cwf);
+      document.getElementById('wf-name').textContent = workflows.find(w => w.id === cwf)?.name || '';
+      renderWfList();
+      renderLib();
+      if (!styleItems.length) seedDefaultStyles();
+      renderGallery();
+      renderLog();
+    }
+    async function initDefault() {
+      // Try cloud first, then localStorage, then default layout
+      const localTs = parseInt(localStorage.getItem('CA_ts') || '0');
+
+      const cloud = await cloudLoad();
+      if (cloud && cloud.workflows && (cloud.ts || 0) >= localTs) {
+        // Cloud state is newer or same — use it
+        localStorage.setItem('CA_ts', String(cloud.ts || Date.now()));
+        applyState(cloud);
+        setSyncStatus('ok');
+        return;
+      }
+
+      // Fall back to localStorage
+      try {
+        const savedWfs = localStorage.getItem('CA_workflows');
+        const savedLib = localStorage.getItem('CA_libItems');
+        const savedStyles = localStorage.getItem('CA_styleItems');
+        const savedGallery = localStorage.getItem('CA_gallery');
+        const savedLog = localStorage.getItem('CA_log');
+
+        if (savedWfs) workflows = JSON.parse(savedWfs);
+        if (savedLib) libItems = JSON.parse(savedLib);
+        if (savedStyles) styleItems = JSON.parse(savedStyles);
+        if (savedGallery) galleryItems = JSON.parse(savedGallery);
+        if (savedLog) logEntries = JSON.parse(savedLog);
+
+        if (savedWfs) {
+          const cwf = localStorage.getItem('CA_current_wf') || workflows[0].id;
+          currentWf = cwf;
+          loadWf(cwf);
+          document.getElementById('wf-name').textContent = workflows.find(w => w.id === cwf)?.name || '';
+          renderWfList();
+          renderLib();
+          if (!styleItems.length) seedDefaultStyles();
+          renderGallery();
+          renderLog();
+          setSyncStatus(cloud === null ? 'err' : 'ok');
+          return;
+        }
+      } catch (e) {}
+
+      // Default layout if completely clean
+      seedDefaultLayout();
+      seedDefaultStyles();
+
+      // Seed library
+      libItems = [
+        { img: '', text: 'Pose: pessoa olhando para câmera' },
+        { img: '', text: 'Referência: flat lay produto' },
+        { img: '', text: 'Estilo: minimalista fundo branco' },
+        { img: '', text: 'Composição: regra dos terços' },
+        { img: '', text: 'Lighting: luz natural lateral' },
+        { img: '', text: 'Mood: profissional e limpo' },
+      ];
+
+      saveCurrentWf();
+    }
+
+    // Run after DOM fully ready
+    window.addEventListener('load', () => {
+      loadApiAccounts();
+      renderApiAccounts();
+      refreshGenApiSelect();
+      refreshApiStatusWidget();
+      initDefault();
+    });
+  </script>
+</body>
+
+</html>
