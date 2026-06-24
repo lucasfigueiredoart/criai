@@ -2651,8 +2651,19 @@
       return '';
     }
 
+    function idRefsHtml(id, refs) {
+      return (refs || []).map((r, ri) => `<div class="id-ref-item"><img src="${r.url}" class="id-ref-img"><span class="id-ref-name">${r.name}</span><button class="id-ref-del" onclick="delIdRef('${id}',${ri})">×</button></div>`).join('');
+    }
+    function delIdRef(id, idx) {
+      if (!cards[id]) return;
+      cards[id].data.idRefs = cards[id].data.idRefs || [];
+      cards[id].data.idRefs.splice(idx, 1);
+      const list = document.getElementById('id-refs-' + id);
+      if (list) list.innerHTML = idRefsHtml(id, cards[id].data.idRefs);
+      saveCurrentWf();
+    }
     function buildIdentity(id, data) {
-      const refsHtml = (data.idRefs || []).map((r, ri) => `<div class="id-ref-item"><img src="${r.url}" class="id-ref-img"><span class="id-ref-name">${r.name}</span><button class="id-ref-del" onclick="this.closest('.id-ref-item').remove();if(cards['${id}']){cards['${id}'].data.idRefs.splice(${ri},1);saveCurrentWf()}">×</button></div>`).join('');
+      const refsHtml = idRefsHtml(id, data.idRefs);
       const tog = data.idToggles || {};
       const on = k => tog[k] !== false;
       const tgl = k => `<div class="id-toggle${on(k) ? ' on' : ''}" onclick="toggleIdSection('${id}','${k}',this)" title="${on(k) ? 'Enviando para IA' : 'Desativado'}"></div>`;
@@ -2700,7 +2711,7 @@
              onmouseover="this.style.borderColor='var(--b3)'" onmouseout="this.style.borderColor='var(--b2)'">
           <span style="font-size:13px">⊕</span> Adicionar referência
         </div>
-        <input type="file" accept="image/*" style="display:none" onchange="handleIdRef(event,'${id}')">
+        <input type="file" accept="image/*" multiple style="display:none" onchange="handleIdRef(event,'${id}')">
       </label>
     </div>
   </div>
@@ -2901,25 +2912,21 @@
       reader.readAsDataURL(f);
     }
     function handleIdRef(e, id) {
-      const f = e.target.files[0]; if (!f) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const url = ev.target.result;
-        const name = f.name.replace(/\.[^.]+$/, '').slice(0, 22);
+      const files = Array.from(e.target.files || []); if (!files.length) return;
+      e.target.value = '';
+      if (!cards[id]) return;
+      if (!cards[id].data.idRefs) cards[id].data.idRefs = [];
+      const readFile = f => new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve({ url: ev.target.result, name: f.name.replace(/\.[^.]+$/, '').slice(0, 22) });
+        reader.readAsDataURL(f);
+      });
+      Promise.all(files.map(readFile)).then(items => {
+        cards[id].data.idRefs.push(...items);
         const list = document.getElementById('id-refs-' + id);
-        if (list) {
-          const item = document.createElement('div');
-          item.className = 'id-ref-item';
-          item.innerHTML = `<img src="${url}" class="id-ref-img"><span class="id-ref-name">${name}</span><button class="id-ref-del" onclick="this.closest('.id-ref-item').remove()">×</button>`;
-          list.appendChild(item);
-        }
-        if (cards[id]) {
-          if (!cards[id].data.idRefs) cards[id].data.idRefs = [];
-          cards[id].data.idRefs.push({ url, name });
-        }
+        if (list) list.innerHTML = idRefsHtml(id, cards[id].data.idRefs);
         saveCurrentWf();
-      };
-      reader.readAsDataURL(f);
+      });
     }
     function handleRef(e, id) {
       const f = e.target.files[0]; if (!f) return;
