@@ -834,6 +834,13 @@
       background: var(--b5)
     }
 
+    /* Enlarged invisible hit area for connector dots — easier to grab without changing visual size */
+    .id-dot::before, .cr-dot-left::before, .ref-dot::before, .copy-dot::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+    }
+
     /* RESULT CARD */
     .cr-card {
       width: 230px;
@@ -2342,6 +2349,10 @@
       doZoom(e.deltaY < 0 ? 1.1 : 0.91, e.clientX - r.left, e.clientY - r.top);
     }, { passive: false });
 
+    boardView.addEventListener('selectstart', e => {
+      if (!e.target.closest('input, textarea, [contenteditable]')) e.preventDefault();
+    });
+
     boardView.addEventListener('mousedown', e => {
       const t = e.target;
       const isBackground = !t.closest('.conn-del') && (t === boardView || t === canvas || t === svgBack || t.tagName === 'svg' || t.closest('.conn-group'));
@@ -2350,6 +2361,7 @@
         panStart = { x: e.clientX - panX, y: e.clientY - panY };
         boardView.style.cursor = 'grabbing';
       }
+      if (!t.closest('input, textarea, [contenteditable]')) e.preventDefault();
     });
 
     document.addEventListener('mousemove', e => {
