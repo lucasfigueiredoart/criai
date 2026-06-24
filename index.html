@@ -328,7 +328,9 @@
       background: var(--bg)
     }
 
-    /* SVG LINES — above canvas so hover/click events reach the paths */
+    /* SVG LINES — behind cards so they don't cross over text/content;
+       the delete-connection hover target still works wherever a line
+       isn't hidden under a card. */
     #svg-back {
       position: absolute;
       top: 0;
@@ -336,12 +338,12 @@
       width: 4000px;
       height: 4000px;
       pointer-events: none;
-      z-index: 3;
+      z-index: 1;
       transform-origin: 0 0;
       overflow: visible
     }
 
-    /* CANVAS — z-index 2, cards sit here */
+    /* CANVAS — cards sit on top of the connection lines */
     #canvas {
       position: absolute;
       top: 0;
