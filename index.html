@@ -3562,15 +3562,34 @@
       else if (state === 'err'){ icon.style.color = '#c06060'; label.textContent = 'sem cloud'; }
       else                     { icon.style.color = 'var(--t4)'; label.textContent = 'cloud'; }
     }
+    // Remove imagens/fontes em base64 antes de sincronizar — a função do Netlify
+    // tem limite de ~6MB por requisição, e isso facilmente passa disso com fotos
+    // e fontes reais. Essas mídias ficam só no localStorage deste navegador.
+    function stripHeavyAssets(wfs) {
+      return (wfs || []).map(wf => ({
+        ...wf,
+        cards: Object.fromEntries(Object.entries(wf.cards || {}).map(([cid, c]) => {
+          const d = { ...(c.data || {}) };
+          if (d.logoUrl) d.logoUrl = '';
+          if (d.refUrl) d.refUrl = '';
+          if (Array.isArray(d.fonts)) d.fonts = d.fonts.map(f => typeof f === 'string' ? f : { name: f.name });
+          if (Array.isArray(d.idRefs)) d.idRefs = d.idRefs.map(r => ({ name: r.name }));
+          return [cid, { ...c, data: d }];
+        }))
+      }));
+    }
     function cloudPush() {
       clearTimeout(_syncTimer);
       _syncTimer = setTimeout(async () => {
         setSyncStatus('saving');
         try {
           const payload = JSON.stringify({
-            workflows, currentWf, libItems, styleItems,
-            galleryItems, logEntries: logEntries.slice(0, 80),
+            workflows: stripHeavyAssets(workflows), currentWf,
+            libItems: (libItems || []).map(it => ({ ...it, img: '' })),
+            styleItems: (styleItems || []).map(it => ({ ...it, img: '' })),
+            logEntries: logEntries.slice(0, 80),
             // apiAccounts NUNCA é enviado — contém chaves de API e o blob é público
+            // galleryItems NUNCA é enviado — histórico de imagens geradas, só local
             ts: Date.now()
           });
           const r = await fetch('/api/sync', {
@@ -3916,15 +3935,50 @@
       renderGallery();
       renderLog();
     }
+    // A nuvem nunca guarda imagens/fontes (ver stripHeavyAssets) — depois de
+    // carregar a estrutura da nuvem, recupera essas mídias do localStorage
+    // deste mesmo navegador, casando por id de card/índice.
+    function restoreHeavyAssetsFromLocal(cloudData) {
+      let localWfs = [], localLib = [], localStyles = [];
+      try { localWfs = JSON.parse(localStorage.getItem('CA_workflows') || '[]'); } catch (e) {}
+      try { localLib = JSON.parse(localStorage.getItem('CA_libItems') || '[]'); } catch (e) {}
+      try { localStyles = JSON.parse(localStorage.getItem('CA_styleItems') || '[]'); } catch (e) {}
+      const localWfById = {}; localWfs.forEach(w => { localWfById[w.id] = w; });
+
+      cloudData.workflows = (cloudData.workflows || []).map(wf => {
+        const lw = localWfById[wf.id];
+        if (!lw || !lw.cards) return wf;
+        const cards = { ...wf.cards };
+        Object.keys(cards).forEach(cid => {
+          const lc = lw.cards[cid]; if (!lc) return;
+          const d = { ...(cards[cid].data || {}) }, ld = lc.data || {};
+          if (!d.logoUrl && ld.logoUrl) d.logoUrl = ld.logoUrl;
+          if (!d.refUrl && ld.refUrl) d.refUrl = ld.refUrl;
+          if (Array.isArray(d.fonts) && Array.isArray(ld.fonts)) {
+            d.fonts = d.fonts.map((f, i) => (ld.fonts[i] && ld.fonts[i].src) ? ld.fonts[i] : f);
+          }
+          if (Array.isArray(d.idRefs) && Array.isArray(ld.idRefs)) {
+            d.idRefs = d.idRefs.map((r, i) => (ld.idRefs[i] && ld.idRefs[i].url) ? ld.idRefs[i] : r);
+          }
+          cards[cid] = { ...cards[cid], data: d };
+        });
+        return { ...wf, cards };
+      });
+      cloudData.libItems = (cloudData.libItems || []).map((it, i) => (!it.img && localLib[i]?.img) ? { ...it, img: localLib[i].img } : it);
+      cloudData.styleItems = (cloudData.styleItems || []).map((it, i) => (!it.img && localStyles[i]?.img) ? { ...it, img: localStyles[i].img } : it);
+      // galleryItems nunca vem da nuvem — mantém o histórico local deste navegador
+      try { cloudData.galleryItems = JSON.parse(localStorage.getItem('CA_gallery') || '[]'); } catch (e) {}
+      return cloudData;
+    }
     async function initDefault() {
       // Try cloud first, then localStorage, then default layout
       const localTs = parseInt(localStorage.getItem('CA_ts') || '0');
 
       const cloud = await cloudLoad();
       if (cloud && cloud.workflows && (cloud.ts || 0) >= localTs) {
-        // Cloud state is newer or same — use it
+        // Cloud state is newer or same — use it (com mídias locais restauradas)
         localStorage.setItem('CA_ts', String(cloud.ts || Date.now()));
-        applyState(cloud);
+        applyState(restoreHeavyAssetsFromLocal(cloud));
         setSyncStatus('ok');
         return;
       }
