@@ -2911,28 +2911,48 @@
     }
 
     /* ═══ FILE HANDLERS ═══ */
+    // Downscales+recompresses an image dataURL to cap memory/storage use (phone photos can be several MB each).
+    function downscaleImage(dataUrl, maxDim, quality) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          const { width, height } = img;
+          if (width <= maxDim && height <= maxDim) { resolve(dataUrl); return; }
+          const scale = Math.min(maxDim / width, maxDim / height);
+          const w = Math.round(width * scale), h = Math.round(height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+    function readFileAsDataUrl(f) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(ev.target.result);
+        reader.readAsDataURL(f);
+      });
+    }
     function handleLogo(e, id) {
       const f = e.target.files[0]; if (!f) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const url = ev.target.result;
+      readFileAsDataUrl(f).then(raw => downscaleImage(raw, 800, 0.85)).then(url => {
         const box = document.getElementById('id-logo-' + id);
         if (box) box.innerHTML = `<img src="${url}" style="max-height:52px;max-width:100%;object-fit:contain;padding:4px">`;
         if (cards[id]) cards[id].data.logoUrl = url;
         saveCurrentWf();
-      };
-      reader.readAsDataURL(f);
+      });
     }
     function handleIdRef(e, id) {
       const files = Array.from(e.target.files || []); if (!files.length) return;
       e.target.value = '';
       if (!cards[id]) return;
       if (!cards[id].data.idRefs) cards[id].data.idRefs = [];
-      const readFile = f => new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = ev => resolve({ url: ev.target.result, name: f.name.replace(/\.[^.]+$/, '').slice(0, 22) });
-        reader.readAsDataURL(f);
-      });
+      const readFile = f => readFileAsDataUrl(f)
+        .then(raw => downscaleImage(raw, 1280, 0.8))
+        .then(url => ({ url, name: f.name.replace(/\.[^.]+$/, '').slice(0, 22) }));
       Promise.all(files.map(readFile)).then(items => {
         cards[id].data.idRefs.push(...items);
         const list = document.getElementById('id-refs-' + id);
@@ -2942,9 +2962,7 @@
     }
     function handleRef(e, id) {
       const f = e.target.files[0]; if (!f) return;
-      const reader = new FileReader();
-      reader.onload = ev => { setRefImage(id, ev.target.result); };
-      reader.readAsDataURL(f);
+      readFileAsDataUrl(f).then(raw => downscaleImage(raw, 1600, 0.85)).then(url => setRefImage(id, url));
     }
     function setRefImage(id, url) {
       const box = document.getElementById('ref-box-' + id);
@@ -3364,9 +3382,12 @@
     /* ═══ GALLERY ═══ */
     function addToGallery(cardId, url) {
       const gid = 'g_' + uid();
-      galleryItems.unshift({ gid, cardId, url, date: new Date().toLocaleDateString('pt-BR'), ts: Date.now() });
-      if (galleryItems.length > 80) galleryItems.length = 80; // limita tamanho salvo localmente
-      renderGallery();
+      // recompacta antes de guardar — gerações ficam em PNG grande e acumulam memória/payload de sync
+      downscaleImage(url, 1600, 0.85).then(compact => {
+        galleryItems.unshift({ gid, cardId, url: compact, date: new Date().toLocaleDateString('pt-BR'), ts: Date.now() });
+        if (galleryItems.length > 30) galleryItems.length = 30; // limita tamanho salvo/sincronizado
+        renderGallery();
+      });
     }
     function renderGallery() {
       const grid = document.getElementById('gv-grid'); if (!grid) return;
@@ -3414,12 +3435,10 @@
     }
     function libUpload(e, idx) {
       const f = e.target.files[0]; if (!f) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        libItems[idx].img = ev.target.result; renderLib();
+      readFileAsDataUrl(f).then(raw => downscaleImage(raw, 1280, 0.8)).then(url => {
+        libItems[idx].img = url; renderLib();
         saveCurrentWf();
-      };
-      reader.readAsDataURL(f);
+      });
     }
     function delLibItem(idx) { if (confirm('Remover?')) { libItems.splice(idx, 1); renderLib(); saveCurrentWf() } }
 
@@ -3451,9 +3470,9 @@
     }
     function styleImgUpload(e, idx) {
       const f = e.target.files[0]; if (!f) return;
-      const reader = new FileReader();
-      reader.onload = ev => { styleItems[idx].img = ev.target.result; renderStyleLib(); saveCurrentWf() };
-      reader.readAsDataURL(f);
+      readFileAsDataUrl(f).then(raw => downscaleImage(raw, 1280, 0.8)).then(url => {
+        styleItems[idx].img = url; renderStyleLib(); saveCurrentWf();
+      });
     }
     function delStyleItem(idx) { if (confirm('Remover este estilo?')) { styleItems.splice(idx, 1); renderStyleLib(); saveCurrentWf() } }
 
