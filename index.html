@@ -2350,7 +2350,7 @@
     }, { passive: false });
 
     boardView.addEventListener('selectstart', e => {
-      if (!e.target.closest('input, textarea, [contenteditable]')) e.preventDefault();
+      if (!e.target.closest('input, textarea, select, button, [contenteditable]')) e.preventDefault();
     });
 
     boardView.addEventListener('mousedown', e => {
@@ -2361,7 +2361,7 @@
         panStart = { x: e.clientX - panX, y: e.clientY - panY };
         boardView.style.cursor = 'grabbing';
       }
-      if (!t.closest('input, textarea, [contenteditable]')) e.preventDefault();
+      if (!t.closest('input, textarea, select, button, [contenteditable]')) e.preventDefault();
     });
 
     document.addEventListener('mousemove', e => {
