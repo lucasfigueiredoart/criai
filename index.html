@@ -2439,16 +2439,25 @@
       if (connFrom) {
         tempLine.setAttribute('x1', -1); tempLine.setAttribute('y1', -1);
         tempLine.setAttribute('x2', -1); tempLine.setAttribute('y2', -1);
-        const under = document.elementFromPoint(e.clientX, e.clientY);
-        const dot = under && (under.classList.contains('cr-dot-left') || under.classList.contains('ref-dot') || under.classList.contains('copy-dot') || under.classList.contains('id-dot'))
-          ? under
-          : under && under.closest('[data-cid]');
+        const dot = findNearestDot(e.clientX, e.clientY, 26);
         if (dot && dot.dataset.cid && dot.dataset.cid !== connFrom) {
           addConn(connFrom, dot.dataset.cid);
         }
         connFrom = null; connDotEl = null;
       }
     });
+
+    // Snaps to the closest connector dot within maxDist screen pixels, ignoring
+    // exact pixel overlap so lines/edges sitting on top of a dot don't block it.
+    function findNearestDot(x, y, maxDist) {
+      let best = null, bestD = maxDist;
+      document.querySelectorAll('[data-cid]').forEach(dot => {
+        const r = dot.getBoundingClientRect();
+        const d = Math.hypot(r.left + r.width / 2 - x, r.top + r.height / 2 - y);
+        if (d <= bestD) { bestD = d; best = dot; }
+      });
+      return best;
+    }
 
     /* ═══ LINES ═══ */
     function getCardEdges(id) {
