@@ -3022,13 +3022,15 @@
       wfs.forEach(wf => {
         Object.values(wf.cards || {}).forEach(c => {
           const d = c.data; if (!d) return;
-          if (isIdbRef(d.logoUrl)) gets.push(idbGet(d.logoUrl).then(v => { if (v) d.logoUrl = v; }));
-          if (isIdbRef(d.refUrl)) gets.push(idbGet(d.refUrl).then(v => { if (v) d.refUrl = v; }));
+          // Se a chave não existir mais no IndexedDB (ex: limpeza pelo navegador),
+          // cai pra vazio em vez de deixar a referência quebrada "idb:..." como src.
+          if (isIdbRef(d.logoUrl)) gets.push(idbGet(d.logoUrl).then(v => { d.logoUrl = v || ''; }));
+          if (isIdbRef(d.refUrl)) gets.push(idbGet(d.refUrl).then(v => { d.refUrl = v || ''; }));
           if (Array.isArray(d.fonts)) d.fonts.forEach(f => {
-            if (f && isIdbRef(f.src)) gets.push(idbGet(f.src).then(v => { if (v) f.src = v; }));
+            if (f && isIdbRef(f.src)) gets.push(idbGet(f.src).then(v => { f.src = v || ''; }));
           });
           if (Array.isArray(d.idRefs)) d.idRefs.forEach(r => {
-            if (r && isIdbRef(r.url)) gets.push(idbGet(r.url).then(v => { if (v) r.url = v; }));
+            if (r && isIdbRef(r.url)) gets.push(idbGet(r.url).then(v => { r.url = v || ''; }));
           });
         });
       });
@@ -3037,7 +3039,7 @@
     }
     async function hydrateArrayFromIDB(arr, field) {
       const gets = (arr || []).map(item => {
-        if (item && isIdbRef(item[field])) return idbGet(item[field]).then(v => { if (v) item[field] = v; });
+        if (item && isIdbRef(item[field])) return idbGet(item[field]).then(v => { item[field] = v || ''; });
         return null;
       }).filter(Boolean);
       await Promise.all(gets);
@@ -4372,6 +4374,11 @@
 
       saveCurrentWf();
     }
+
+    // Pede armazenamento persistente ao navegador — reduz a chance dele
+    // limpar o IndexedDB (fontes/imagens) automaticamente por falta de espaço.
+    // Sem efeito visível se o navegador não suportar ou negar; é best-effort.
+    if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 
     // Run after DOM fully ready
     window.addEventListener('load', () => {
