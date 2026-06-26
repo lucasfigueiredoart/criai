@@ -3308,10 +3308,28 @@
       if (btn) { btn.innerHTML = '⚡ Gerar todos'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.onclick = genAll; }
     }
 
+    // A API só gera 1024x1024 (não aceita 1080x1080 direto), mas como é a
+    // mesma proporção 1:1, dá pra fazer um upscale simples sem cortar nem
+    // inventar conteúdo — então o download final já sai no tamanho nativo
+    // do feed do Instagram.
+    function squareTo1080(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.width !== img.height) { resolve(null); return; }
+          const canvas = document.createElement('canvas');
+          canvas.width = 1080; canvas.height = 1080;
+          canvas.getContext('2d').drawImage(img, 0, 0, 1080, 1080);
+          canvas.toBlob(blob => resolve(blob), 'image/png');
+        };
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
     async function dlUrl(url, filename) {
       try {
-        const res = await fetch(url);
-        const blob = await res.blob();
+        const squared = await squareTo1080(url);
+        const blob = squared || await (await fetch(url)).blob();
         const localUrl = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = localUrl; a.download = filename;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
