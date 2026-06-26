@@ -2100,6 +2100,7 @@
         </div>
 
         <div id="tb-right">
+          <button class="tb-btn hi" onclick="replicateAdMode()" title="Monta 1 card de referência + 10 variações automáticas (fundos branco/preto/vermelho, diagramações alternadas, foto da identidade vinculada)">↻ Replicar Anúncio</button>
           <button class="tb-btn" onclick="clearConns()">Limpar linhas</button>
           <button class="tb-btn" onclick="autoConnect()">Auto-conectar</button>
           <span id="sync-dot" title="Sincronizado" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--t4);padding:0 6px">
@@ -2872,7 +2873,7 @@
       <button class="cr-pbtn" id="cr-expand-${id}" onclick="expandToStories('${id}')" title="Reaproveita esta arte e expande as bordas com IA para o formato 2:3 (Stories)">↕ Versão Stories</button>
     </div>
     <div class="alter-box" id="alter-${id}">
-      <textarea class="alter-ta" rows="2" placeholder="Instruções de ajuste..."></textarea>
+      <textarea class="alter-ta" rows="2" placeholder="Instruções de ajuste..." oninput="cards['${id}']&&(cards['${id}'].data.adjust=this.value);saveCurrentWf()">${data.adjust || ''}</textarea>
       <button class="cr-gen-btn" style="margin-top:4px" onclick="genCard('${id}',true)">⚡ REGERAR</button>
     </div>
   </div>
@@ -3993,6 +3994,48 @@
       // Connect identity to all results
       resultIds.forEach(rid => addConn(iid, rid));
       drawLines();
+    }
+    // Monta o modo "Replicar Anúncio": 1 card de referência (o anúncio a ser
+    // replicado) + identidade vinculada + 10 resultados, cada um com
+    // instruções pré-prontas de fundo (branco/preto/vermelho) e diagramação
+    // alternada, trocando a foto pela referência da identidade visual.
+    function replicateAdMode() {
+      if (!confirm('Isso vai limpar o storyboard atual deste workflow e montar o modo "Replicar Anúncio" (1 referência + 10 variações). Continuar?')) return;
+
+      canvas.innerHTML = ''; svgBack.innerHTML = ''; cards = {}; conns = [];
+
+      const iid = spawnCard('identity', 10, 360);
+      const rfid = spawnCard('ref', 700, 0);
+
+      const variations = [
+        { bg: 'fundo branco liso', layout: 'exatamente a mesma diagramação do anúncio de referência (textos e botão nas mesmas posições)' },
+        { bg: 'fundo branco liso', layout: 'diagramação alternada: inverta os elementos de texto (o que estava à esquerda passa para a direita)' },
+        { bg: 'fundo preto liso', layout: 'exatamente a mesma diagramação do anúncio de referência' },
+        { bg: 'fundo preto liso', layout: 'diagramação alternada: texto centralizado' },
+        { bg: 'fundo vermelho liso', layout: 'exatamente a mesma diagramação do anúncio de referência' },
+        { bg: 'fundo vermelho liso', layout: 'diagramação alternada: inverta os elementos de texto' },
+        { bg: 'fundo branco liso', layout: 'diagramação alternada: texto na parte inferior, foto ocupando o topo' },
+        { bg: 'fundo preto liso', layout: 'exatamente a mesma diagramação do anúncio de referência' },
+        { bg: 'fundo vermelho liso', layout: 'diagramação alternada: texto na parte superior, foto ocupando a base' },
+        { bg: 'fundo branco liso', layout: 'exatamente a mesma diagramação do anúncio de referência' },
+      ];
+
+      const colGap = 310, perRow = 5, resultY = 360;
+      variations.forEach((v, i) => {
+        const col = i % perRow, rowBlock = Math.floor(i / perRow);
+        const x = 260 + col * colGap;
+        const y = resultY + rowBlock * 700;
+        const adjust = `Replique este anúncio de referência mantendo o mesmo conceito publicitário e a mesma mensagem. Troque a foto da pessoa pela referência enviada na identidade visual vinculada (logo/referências), mantendo pose e enquadramento parecidos. Use ${v.bg}. Aplique ${v.layout}.`;
+        const rid = spawnCard('result', x, y, undefined, { adjust });
+        document.getElementById('alter-' + rid)?.classList.add('open');
+        addConn(rfid, rid);
+        addConn(iid, rid);
+      });
+
+      drawLines();
+      fitViewToContent();
+      saveCurrentWf();
+      alert('Modo "Replicar Anúncio" montado! Suba a arte que quer replicar no card de referência e a foto/identidade da marca no card de Identidade Visual, depois clique em "Gerar todos".');
     }
     // Adiciona um card extra do tipo escolhido, posicionado ao lado dos cards
     // já existentes daquele mesmo tipo (em vez de cair num ponto aleatório),
