@@ -2101,6 +2101,7 @@
 
         <div id="tb-right">
           <button class="tb-btn hi" onclick="replicateAdMode()" title="Monta 1 card de referência + 10 variações automáticas (fundos branco/preto/vermelho, diagramações alternadas, foto da identidade vinculada)">↻ Replicar Anúncio</button>
+          <button class="tb-btn" onclick="backToNormalMode()" title="Limpa o storyboard atual e volta ao layout padrão (10 sets de referência → resultado → copy)">⊙ Voltar ao workflow normal</button>
           <button class="tb-btn" onclick="clearConns()">Limpar linhas</button>
           <button class="tb-btn" onclick="autoConnect()">Auto-conectar</button>
           <span id="sync-dot" title="Sincronizado" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--t4);padding:0 6px">
@@ -3994,6 +3995,15 @@
       // Connect identity to all results
       resultIds.forEach(rid => addConn(iid, rid));
       drawLines();
+    }
+    // Limpa o board atual e reaplica o layout padrão do storyboard
+    // (10 sets referência → resultado → copy), saindo de modos especiais
+    // como "Replicar Anúncio".
+    function backToNormalMode() {
+      if (!confirm('Isso vai limpar o storyboard atual deste workflow e voltar ao layout padrão. Continuar?')) return;
+      canvas.innerHTML = ''; svgBack.innerHTML = ''; cards = {}; conns = [];
+      seedDefaultLayout();
+      saveCurrentWf();
     }
     // Monta o modo "Replicar Anúncio": 1 card de referência (o anúncio a ser
     // replicado) + identidade vinculada + 10 resultados, cada um com
