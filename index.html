@@ -3373,6 +3373,27 @@
         img.src = srcUrl;
       });
     }
+    // Escala a imagem 2:3 (1024x1536, único portrait que a API gera) pra
+    // cobrir a altura de 1920 e corta só a sobra lateral — fecha exatamente
+    // em 1080x1920 sem esticar/distorcer e sem cortar o conteúdo central
+    // (que o prompt do outpaint já manteve afastado das bordas).
+    function cropToNativeStories(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          const targetW = 1080, targetH = 1920;
+          const scale = targetH / img.height;
+          const scaledW = img.width * scale;
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW; canvas.height = targetH;
+          const dx = (targetW - scaledW) / 2;
+          canvas.getContext('2d').drawImage(img, dx, 0, scaledW, targetH);
+          canvas.toBlob(blob => resolve(blob), 'image/png');
+        };
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
     async function expandToStories(id) {
       const d = genImgs[id]; if (!d?.url) { alert('Nenhuma imagem gerada ainda.'); return; }
       const model = document.getElementById('def-model')?.value || 'gpt-image-1';
@@ -3391,7 +3412,7 @@
         const padded = await padToCanvasPng(d.url, 1024, 1536);
         const fd = new FormData();
         fd.append('image', padded, 'source.png');
-        fd.append('prompt', 'Estenda naturalmente o fundo, as cores, a iluminação e os elementos gráficos desta imagem para preencher as áreas transparentes no topo e na base. Mantenha exatamente o conteúdo central já existente sem nenhuma alteração — mesmo rosto, texto e composição.');
+        fd.append('prompt', 'Estenda naturalmente o fundo, as cores, a iluminação e os elementos gráficos desta imagem para preencher as áreas transparentes no topo e na base. Mantenha exatamente o conteúdo central já existente sem nenhuma alteração — mesmo rosto, texto e composição. IMPORTANTE: o resultado final será cortado um pouco nas laterais para caber no formato 9:16 (Stories), então mantenha todo texto, botões, logos e informações importantes centralizados, com uma margem de segurança livre de elementos críticos nas bordas esquerda e direita.');
         fd.append('model', model);
         fd.append('n', '1');
         fd.append('size', '1024x1536');
@@ -3409,7 +3430,18 @@
           : data.data[0].url;
 
         addToGallery(id, outUrl);
-        dlUrl(outUrl, `criativo_${id}_stories_${Date.now()}.png`);
+        // A API não tem tamanho nativo 9:16 (máximo é 1024x1536 = 2:3), então
+        // fechamos em 1080x1920 cortando só a margem de segurança lateral
+        // pedida no prompt acima — o conteúdo central não é afetado.
+        const cropped = await cropToNativeStories(outUrl);
+        if (cropped) {
+          const localUrl = URL.createObjectURL(cropped);
+          const a = document.createElement('a'); a.href = localUrl; a.download = `criativo_${id}_stories_${Date.now()}.png`;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(localUrl), 5000);
+        } else {
+          dlUrl(outUrl, `criativo_${id}_stories_${Date.now()}.png`);
+        }
       } catch (err) {
         alert('Erro ao expandir para Stories: ' + err.message);
       } finally {
