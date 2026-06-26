@@ -3954,13 +3954,17 @@
       // Identity card on the left
       const iid = spawnCard('identity', 10, 30);
 
-      const colGap = 310, refY = 0, resultY = 360, copyY = 800;
+      // 5 colunas por linha — 2 linhas de blocos (ref/resultado/copy) em vez de 10 colunas lado a lado
+      const colGap = 310, rowBlockGap = 1300, perRow = 5;
+      const refY = 0, resultY = 360, copyY = 800;
       const resultIds = [];
       for (let i = 0; i < STORYBOARD_SET_COUNT; i++) {
-        const x = 260 + i * colGap;
-        const rfid = spawnCard('ref', x, refY);
-        const rid = spawnCard('result', x, resultY);
-        const cpid = spawnCard('copy', x, copyY);
+        const col = i % perRow, rowBlock = Math.floor(i / perRow);
+        const x = 260 + col * colGap;
+        const yOff = rowBlock * rowBlockGap;
+        const rfid = spawnCard('ref', x, refY + yOff);
+        const rid = spawnCard('result', x, resultY + yOff);
+        const cpid = spawnCard('copy', x, copyY + yOff);
         const numEl = document.querySelector(`#${cpid} .copy-num`);
         if (numEl) numEl.textContent = '#' + (i + 1);
         addConn(rfid, rid);
