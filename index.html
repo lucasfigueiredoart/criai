@@ -2924,6 +2924,126 @@
   <div class="copy-dot" data-cid="${id}"></div>`;
     }
 
+    /* ═══ ARMAZENAMENTO DE MÍDIA (IndexedDB) ═══ */
+    // localStorage tem um limite duro de ~5-10MB no total do site, e excedê-lo
+    // faz o salvamento falhar silenciosamente (imagens "desaparecem" depois de
+    // recarregar). IndexedDB não tem esse teto apertado — imagens/fontes pesadas
+    // ficam guardadas aqui, e só uma referência pequena (ex: "idb:card1:logo")
+    // vai no JSON salvo em localStorage/nuvem.
+    const IDB_NAME = 'cria-ai-assets', IDB_STORE = 'assets';
+    let idbOpenPromise = null;
+    function idbOpen() {
+      if (idbOpenPromise) return idbOpenPromise;
+      idbOpenPromise = new Promise((resolve, reject) => {
+        if (!window.indexedDB) { reject(new Error('IndexedDB não disponível')); return; }
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      return idbOpenPromise;
+    }
+    async function idbSet(key, value) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(value, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+    async function idbGet(key) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const req = tx.objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    const isHeavyAsset = v => typeof v === 'string' && v.startsWith('data:');
+    const isIdbRef = v => typeof v === 'string' && v.startsWith('idb:');
+
+    // Varre os workflows, manda toda imagem/fonte (data:...) pro IndexedDB e
+    // devolve uma cópia leve com só a referência — é essa cópia que vai pro
+    // localStorage/nuvem.
+    async function offloadWorkflowsToIDB(wfs) {
+      const out = JSON.parse(JSON.stringify(wfs));
+      const puts = [];
+      out.forEach(wf => {
+        Object.entries(wf.cards || {}).forEach(([cid, c]) => {
+          const d = c.data; if (!d) return;
+          if (isHeavyAsset(d.logoUrl)) {
+            const key = 'idb:' + cid + ':logo';
+            puts.push(idbSet(key, d.logoUrl)); d.logoUrl = key;
+          }
+          if (isHeavyAsset(d.refUrl)) {
+            const key = 'idb:' + cid + ':ref';
+            puts.push(idbSet(key, d.refUrl)); d.refUrl = key;
+          }
+          if (Array.isArray(d.fonts)) {
+            d.fonts.forEach((f, i) => {
+              if (f && isHeavyAsset(f.src)) {
+                const key = 'idb:' + cid + ':font:' + i;
+                puts.push(idbSet(key, f.src)); f.src = key;
+              }
+            });
+          }
+          if (Array.isArray(d.idRefs)) {
+            d.idRefs.forEach((r, i) => {
+              if (r && isHeavyAsset(r.url)) {
+                const key = 'idb:' + cid + ':idref:' + i;
+                puts.push(idbSet(key, r.url)); r.url = key;
+              }
+            });
+          }
+        });
+      });
+      await Promise.all(puts);
+      return out;
+    }
+    // Mesma ideia para listas simples de itens com campo de imagem (biblioteca, galeria).
+    async function offloadArrayToIDB(arr, prefix, field) {
+      const out = JSON.parse(JSON.stringify(arr || []));
+      const puts = [];
+      out.forEach((item, i) => {
+        if (item && isHeavyAsset(item[field])) {
+          const key = 'idb:' + prefix + ':' + i;
+          puts.push(idbSet(key, item[field])); item[field] = key;
+        }
+      });
+      await Promise.all(puts);
+      return out;
+    }
+    // Caminho inverso: resolve toda referência "idb:..." de volta pro
+    // data:... real, lendo do IndexedDB, antes de renderizar os cards.
+    async function hydrateWorkflowsFromIDB(wfs) {
+      const gets = [];
+      wfs.forEach(wf => {
+        Object.values(wf.cards || {}).forEach(c => {
+          const d = c.data; if (!d) return;
+          if (isIdbRef(d.logoUrl)) gets.push(idbGet(d.logoUrl).then(v => { if (v) d.logoUrl = v; }));
+          if (isIdbRef(d.refUrl)) gets.push(idbGet(d.refUrl).then(v => { if (v) d.refUrl = v; }));
+          if (Array.isArray(d.fonts)) d.fonts.forEach(f => {
+            if (f && isIdbRef(f.src)) gets.push(idbGet(f.src).then(v => { if (v) f.src = v; }));
+          });
+          if (Array.isArray(d.idRefs)) d.idRefs.forEach(r => {
+            if (r && isIdbRef(r.url)) gets.push(idbGet(r.url).then(v => { if (v) r.url = v; }));
+          });
+        });
+      });
+      await Promise.all(gets);
+      return wfs;
+    }
+    async function hydrateArrayFromIDB(arr, field) {
+      const gets = (arr || []).map(item => {
+        if (item && isIdbRef(item[field])) return idbGet(item[field]).then(v => { if (v) item[field] = v; });
+        return null;
+      }).filter(Boolean);
+      await Promise.all(gets);
+      return arr;
+    }
+
     /* ═══ FILE HANDLERS ═══ */
     // Downscales+recompresses an image dataURL to cap memory/storage use (phone photos can be several MB each).
     function downscaleImage(dataUrl, maxDim, quality) {
@@ -3744,23 +3864,33 @@
         });
         wf.conns = conns.slice();
       }
+      persistToLocalStorage();
+      cloudPush();
+    }
+    // Manda imagens/fontes pesadas pro IndexedDB e só então grava o JSON leve
+    // (com referências "idb:...") no localStorage — evita o limite de ~5-10MB
+    // que antes fazia mídia "desaparecer" silenciosamente após recarregar.
+    async function persistToLocalStorage() {
       try {
-        localStorage.setItem('CA_workflows', JSON.stringify(workflows));
+        const lightWorkflows = await offloadWorkflowsToIDB(workflows);
+        const lightLib = await offloadArrayToIDB(libItems, 'lib', 'img');
+        const lightStyles = await offloadArrayToIDB(styleItems, 'style', 'img');
+        localStorage.setItem('CA_workflows', JSON.stringify(lightWorkflows));
         localStorage.setItem('CA_current_wf', currentWf);
-        localStorage.setItem('CA_libItems', JSON.stringify(libItems));
-        localStorage.setItem('CA_styleItems', JSON.stringify(styleItems));
+        localStorage.setItem('CA_libItems', JSON.stringify(lightLib));
+        localStorage.setItem('CA_styleItems', JSON.stringify(lightStyles));
         localStorage.setItem('CA_ts', String(Date.now()));
         // genImgs (base64) kept in memory only — too large for localStorage
       } catch (e) {
         console.warn('Falha ao salvar estado:', e);
       }
       try {
-        localStorage.setItem('CA_gallery', JSON.stringify(galleryItems));
+        const lightGallery = await offloadArrayToIDB(galleryItems, 'gallery', 'url');
+        localStorage.setItem('CA_gallery', JSON.stringify(lightGallery));
         localStorage.setItem('CA_log', JSON.stringify(logEntries.slice(0, 80)));
       } catch (e) {
-        console.warn('Falha ao salvar galeria/log (limite de armazenamento):', e);
+        console.warn('Falha ao salvar galeria/log:', e);
       }
-      cloudPush();
     }
     function loadWf(id) {
       canvas.innerHTML = ''; svgBack.innerHTML = ''; cards = {}; conns = [];
@@ -4183,7 +4313,12 @@
       if (cloud && cloud.workflows && (cloud.ts || 0) >= localTs) {
         // Cloud state is newer or same — use it (com mídias locais restauradas)
         localStorage.setItem('CA_ts', String(cloud.ts || Date.now()));
-        applyState(restoreHeavyAssetsFromLocal(cloud));
+        const merged = restoreHeavyAssetsFromLocal(cloud);
+        await hydrateWorkflowsFromIDB(merged.workflows || []);
+        await hydrateArrayFromIDB(merged.libItems, 'img');
+        await hydrateArrayFromIDB(merged.styleItems, 'img');
+        await hydrateArrayFromIDB(merged.galleryItems, 'url');
+        applyState(merged);
         setSyncStatus('ok');
         return;
       }
@@ -4203,6 +4338,10 @@
         if (savedLog) logEntries = JSON.parse(savedLog);
 
         if (savedWfs) {
+          await hydrateWorkflowsFromIDB(workflows);
+          await hydrateArrayFromIDB(libItems, 'img');
+          await hydrateArrayFromIDB(styleItems, 'img');
+          await hydrateArrayFromIDB(galleryItems, 'url');
           const cwf = localStorage.getItem('CA_current_wf') || workflows[0].id;
           currentWf = cwf;
           loadWf(cwf);
