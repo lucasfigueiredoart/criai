@@ -1142,7 +1142,7 @@
 
     /* COPY CARD */
     .copy-card {
-      width: 190px;
+      width: 280px;
       background: #271e08;
       border-color: rgba(205,170,70,.38);
       z-index: 25;
@@ -1155,7 +1155,7 @@
     .copy-card * { color: #fff }
 
     .copy-handle {
-      padding: 7px 10px 0;
+      padding: 9px 12px 0;
       cursor: grab;
       display: flex;
       align-items: center;
@@ -1169,7 +1169,7 @@
 
     .copy-lbl {
       font-family: 'Syne', sans-serif;
-      font-size: 8px;
+      font-size: 10px;
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
@@ -1178,12 +1178,12 @@
 
     .copy-num {
       font-family: 'DM Mono', monospace;
-      font-size: 9px;
+      font-size: 11px;
       color: var(--t4)
     }
 
     .copy-body {
-      padding: 5px 10px 10px;
+      padding: 6px 12px 12px;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -1194,14 +1194,14 @@
       width: 100%;
       border: none;
       background: transparent;
-      font-size: 11px;
+      font-size: 16px;
       color: var(--t2);
       font-family: 'DM Mono', monospace;
-      line-height: 1.7;
+      line-height: 1.6;
       resize: none;
       outline: none;
       flex: 1;
-      min-height: 72px;
+      min-height: 130px;
       overflow-y: auto
     }
 
@@ -2219,13 +2219,13 @@
   <!-- ADD -->
   <div id="add-wrap">
     <div id="add-menu">
-      <div class="am-item" onclick="spawnCard('result');closeAdd()">
+      <div class="am-item" onclick="spawnCardAndFit('result');closeAdd()">
         <div class="am-dot" style="background:#333"></div>Card Resultado
       </div>
-      <div class="am-item" onclick="spawnCard('ref');closeAdd()">
+      <div class="am-item" onclick="spawnCardAndFit('ref');closeAdd()">
         <div class="am-dot" style="background:#2a2a2a"></div>Referência
       </div>
-      <div class="am-item" onclick="spawnCard('copy');closeAdd()">
+      <div class="am-item" onclick="spawnCardAndFit('copy');closeAdd()">
         <div class="am-dot" style="background:#222"></div>Copy
       </div>
     </div>
@@ -3944,39 +3944,71 @@
     }
 
     /* ═══ INIT ═══ */
+    // Layout padrão fixo: 10 colunas, cada uma com referência → resultado → copy.
+    // Estrutura previsível em vez de cards soltos — menos zoom/arrasto pra achar as coisas.
+    const STORYBOARD_SET_COUNT = 10;
     function seedDefaultLayout() {
-      scale = 0.72; panX = 60; panY = 60;
+      scale = 0.45; panX = 60; panY = 220;
       applyTransform();
 
       // Identity card on the left
-      const iid = spawnCard('identity', 10, 0);
+      const iid = spawnCard('identity', 10, 30);
 
-      // 10 result cards: 2 rows of 5, starting at x=260
+      const colGap = 310, refY = 0, resultY = 360, copyY = 800;
       const resultIds = [];
-      const colGap = 260, rowGap = 370;
-      for (let i = 0; i < 10; i++) {
-        const col = i % 5, row = Math.floor(i / 5);
-        const rid = spawnCard('result', 260 + col * colGap, row * rowGap + 30);
-        resultIds.push(rid);
-      }
-
-      // 5 ref cards: above row 1 results
-      for (let i = 0; i < 5; i++) {
-        const rfid = spawnCard('ref', 260 + i * colGap, -160);
-        addConn(rfid, resultIds[i]);
-      }
-
-      // 5 copy cards: below row 2 results
-      for (let i = 0; i < 5; i++) {
-        const cpid = spawnCard('copy', 260 + i * colGap, rowGap * 2 + 50);
+      for (let i = 0; i < STORYBOARD_SET_COUNT; i++) {
+        const x = 260 + i * colGap;
+        const rfid = spawnCard('ref', x, refY);
+        const rid = spawnCard('result', x, resultY);
+        const cpid = spawnCard('copy', x, copyY);
         const numEl = document.querySelector(`#${cpid} .copy-num`);
         if (numEl) numEl.textContent = '#' + (i + 1);
-        addConn(cpid, resultIds[i]);
+        addConn(rfid, rid);
+        addConn(cpid, rid);
+        resultIds.push(rid);
       }
 
       // Connect identity to all results
       resultIds.forEach(rid => addConn(iid, rid));
       drawLines();
+    }
+    // Adiciona um card extra do tipo escolhido, posicionado ao lado dos cards
+    // já existentes daquele mesmo tipo (em vez de cair num ponto aleatório),
+    // e ajusta o zoom pra encaixar tudo na tela sem precisar arrastar/zoomar.
+    function spawnCardAndFit(type) {
+      const sameType = Object.values(cards).filter(c => c.type === type);
+      const colGap = 310;
+      const yByType = { ref: 0, result: 360, copy: 800 };
+      const x = sameType.length ? Math.max(...sameType.map(c => c.x)) + colGap : 260;
+      const y = yByType[type] ?? 0;
+      const cid = spawnCard(type, x, y);
+      if (type === 'copy') {
+        const n = Object.values(cards).filter(c => c.type === 'copy').length;
+        const numEl = document.querySelector(`#${cid} .copy-num`);
+        if (numEl) numEl.textContent = '#' + n;
+      }
+      fitViewToContent();
+      saveCurrentWf();
+    }
+    // Recalcula o zoom/pan pra todos os cards caberem na tela, sem precisar
+    // arrastar/zoomar manualmente atrás de um card recém-adicionado.
+    function fitViewToContent() {
+      const ids = Object.keys(cards); if (!ids.length) return;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      ids.forEach(id => {
+        const c = cards[id];
+        const w = c.data?.width || 260, h = c.data?.height || 320;
+        minX = Math.min(minX, c.x); minY = Math.min(minY, c.y);
+        maxX = Math.max(maxX, c.x + w); maxY = Math.max(maxY, c.y + h);
+      });
+      const r = boardView.getBoundingClientRect();
+      const pad = 60;
+      const contentW = (maxX - minX) + pad * 2, contentH = (maxY - minY) + pad * 2;
+      const ns = Math.max(0.08, Math.min(1, Math.min(r.width / contentW, r.height / contentH)));
+      scale = ns;
+      panX = -minX * ns + pad * ns;
+      panY = -minY * ns + pad * ns;
+      applyTransform();
     }
     function seedDefaultStyles() {
       styleItems = [
